@@ -103,6 +103,7 @@
   .player-foot{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);font-family:var(--mono);padding:0 2px}
 
   /* ========== 通用区块 ========== */
+  html{scroll-behavior:smooth}
   main{max-width:1200px;margin:0 auto;padding:0 24px 60px}
   section{padding-top:58px;scroll-margin-top:76px}
   .sec-head{margin-bottom:24px}
@@ -1882,14 +1883,39 @@ const io = new IntersectionObserver(es => {
 }, { threshold: 0.06 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-/* ========== 4. 导航 scrollspy ========== */
-const navLinks = [...document.querySelectorAll('#navLinks a')];
+/* ========== 4. 导航 scrollspy:滚动高亮 + 标签栏跟随滑动 ========== */
+const navBox = document.getElementById('navLinks');
+const navLinks = [...navBox.querySelectorAll('a')];
 const secs = navLinks.map(a => document.querySelector(a.getAttribute('href')));
-window.addEventListener('scroll', () => {
+let spyTick = false, lastIdx = -2;
+
+function updateSpy() {
+  // 触发线 = sticky 导航实际高度 + 余量(窄屏导航为两行,高度自适应)
+  const line = document.querySelector('nav').offsetHeight + 24;
   let idx = -1;
-  secs.forEach((s, i) => { if (s && s.getBoundingClientRect().top < 120) idx = i; });
+  secs.forEach((s, i) => { if (s && s.getBoundingClientRect().top <= line) idx = i; });
   navLinks.forEach((a, i) => a.classList.toggle('active', i === idx));
+  if (idx !== lastIdx) {
+    lastIdx = idx;
+    if (idx >= 0) slideNav(navLinks[idx]);
+  }
+}
+
+// 让当前标签在标签栏内居中可见(桌面溢出 / 手机横滑均适用)
+function slideNav(a) {
+  const target = a.offsetLeft - (navBox.clientWidth - a.offsetWidth) / 2;
+  const max = navBox.scrollWidth - navBox.clientWidth;
+  navBox.scrollTo({ left: Math.max(0, Math.min(target, max)), behavior: 'smooth' });
+}
+
+window.addEventListener('scroll', () => {
+  if (spyTick) return;
+  spyTick = true;
+  requestAnimationFrame(() => { updateSpy(); spyTick = false; });
 }, { passive: true });
+window.addEventListener('resize', () => { lastIdx = -2; updateSpy(); });
+navLinks.forEach(a => a.addEventListener('click', () => slideNav(a)));
+updateSpy();
 
 /* ========== 5. Hero:波形生成 + 字幕轮播 ========== */
 (function () {
