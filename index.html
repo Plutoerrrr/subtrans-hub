@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字幕与翻译 · AI 工具库 & 资讯看板</title>
+<style>
+  /* ========== 设计变量 ========== */
+  :root{
+    --bg:#070b12; --bg2:#0b1220; --card:#0f1726; --card2:#141f33;
+    --border:rgba(148,163,184,.15); --border2:rgba(148,163,184,.28);
+    --text:#e6edf7; --muted:#8fa1b8; --dim:#5b6b82;
+    --cyan:#22d3ee; --blue:#38bdf8; --violet:#818cf8; --purple:#a78bfa;
+    --green:#34d399; --amber:#fbbf24; --red:#f87171; --pink:#f472b6;
+    --grad:linear-gradient(135deg,#22d3ee 0%,#818cf8 60%,#a78bfa 100%);
+    --radius:14px;
+    --mono:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 85% -10%, rgba(129,140,248,.14), transparent 60%),
+      radial-gradient(700px 420px at -10% 20%, rgba(34,211,238,.10), transparent 55%);
+  }
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+  ::selection{background:rgba(34,211,238,.3)}
+
+  /* ========== 顶部导航 ========== */
+  nav{
+    position:sticky;top:0;z-index:100;
+    backdrop-filter:blur(14px); background:rgba(7,11,18,.78);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:22px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15.5px;white-space:nowrap}
+  .logo .dot{width:26px;height:26px;border-radius:8px;background:var(--grad);display:grid;place-items:center;font-size:13px;color:#06121f}
+  .logo em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .nav-links{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{
+    padding:7px 13px;border-radius:9px;font-size:13px;color:var(--muted);white-space:nowrap;transition:.18s;
+  }
+  .nav-links a:hover{color:var(--text);background:rgba(148,163,184,.1);text-decoration:none}
+  .nav-links a.active{color:#dff5ff;background:rgba(34,211,238,.13)}
+
+  /* ========== Hero ========== */
+  .hero{max-width:1200px;margin:0 auto;padding:64px 24px 40px;display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:center}
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--cyan);
+    border:1px solid rgba(34,211,238,.35);border-radius:99px;padding:5px 14px;background:rgba(34,211,238,.07);
+    letter-spacing:.06em;
+  }
+  .kicker .pulse{width:7px;height:7px;border-radius:50%;background:var(--cyan);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,211,238,.5)}50%{box-shadow:0 0 0 7px rgba(34,211,238,0)}}
+  .hero h1{font-size:clamp(30px,4.2vw,46px);line-height:1.22;margin:18px 0 14px;font-weight:800;letter-spacing:-.01em}
+  .hero h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p.lead{color:var(--muted);font-size:15.5px;max-width:560px}
+  .hero .chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
+  .stat{
+    background:var(--card);border:1px solid var(--border);border-radius:11px;padding:10px 16px;
+    display:flex;flex-direction:column;min-width:112px;
+  }
+  .stat b{font-size:20px;font-family:var(--mono);color:#fff}
+  .stat b i{font-style:normal;color:var(--cyan);font-size:13px}
+  .stat span{font-size:12px;color:var(--dim);margin-top:1px}
+  .hero-meta{margin-top:22px;font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .hero-meta .sep{width:3px;height:3px;border-radius:50%;background:var(--dim)}
+
+  /* 模拟播放器(纯装饰) */
+  .player{
+    background:linear-gradient(160deg,#0d1526,#0a1019);border:1px solid var(--border2);
+    border-radius:18px;padding:18px;box-shadow:0 24px 60px -20px rgba(0,0,0,.7);
+  }
+  .screen{
+    background:#050a12;border-radius:12px;aspect-ratio:16/9;position:relative;overflow:hidden;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:34px;
+    border:1px solid rgba(148,163,184,.1);
+  }
+  .screen::before{ /* 播放键 */
+    content:"";position:absolute;inset:0;margin:auto;width:54px;height:54px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.06);backdrop-filter:blur(2px);
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>');
+    background-repeat:no-repeat;background-position:center;background-size:24px;opacity:.75;
+  }
+  .subs{position:relative;text-align:center;width:100%;padding:0 26px}
+  .subs .zh{font-size:15.5px;font-weight:600;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.9)}
+  .subs .en{font-size:12.5px;color:rgba(255,255,255,.72);margin-top:3px;font-family:var(--mono);text-shadow:0 1px 8px rgba(0,0,0,.9)}
+  .subs .badge-live{
+    position:absolute;top:-84px;left:14px;display:inline-flex;align-items:center;gap:6px;
+    font-size:10.5px;color:#ff9db1;background:rgba(244,63,94,.16);border:1px solid rgba(244,63,94,.4);
+    padding:3px 9px;border-radius:99px;letter-spacing:.05em;
+  }
+  .wave{display:flex;align-items:center;gap:3px;height:34px;margin:14px 2px 6px}
+  .wave span{flex:1;background:linear-gradient(180deg,var(--cyan),rgba(129,140,248,.55));border-radius:2px;animation:wv 1.1s ease-in-out infinite;opacity:.85}
+  @keyframes wv{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+  .pbar{height:4px;border-radius:99px;background:rgba(148,163,184,.18);overflow:hidden;margin:2px 2px 10px}
+  .pbar i{display:block;height:100%;width:64%;background:var(--grad);border-radius:99px}
+  .player-foot{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);font-family:var(--mono);padding:0 2px}
+
+  /* ========== 通用区块 ========== */
+  main{max-width:1200px;margin:0 auto;padding:0 24px 60px}
+  section{padding-top:58px}
+  .sec-head{margin-bottom:24px}
+  .sec-num{
+    font-family:var(--mono);font-size:11.5px;color:var(--cyan);letter-spacing:.22em;
+    display:flex;align-items:center;gap:12px;
+  }
+  .sec-num::after{content:"";height:1px;flex:1;max-width:180px;background:linear-gradient(90deg,rgba(34,211,238,.5),transparent)}
+  .sec-head h2{font-size:clamp(21px,2.6vw,27px);margin:10px 0 8px;font-weight:800}
+  .sec-head p{color:var(--muted);font-size:14px;max-width:760px}
+  .sec-sub-h{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;letter-spacing:.02em}
+  .sec-sub-h::before{content:"";width:4px;height:15px;border-radius:2px;background:var(--grad);flex:none}
+  .dim{color:var(--dim)}
+  .note{font-size:12px;color:var(--dim);margin-top:12px;display:flex;gap:6px;align-items:flex-start}
+  .note::before{content:"※";color:var(--amber)}
+
+  /* 滚动进场 */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ========== 资讯速览 ========== */
+  .news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .news{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 18px 16px;position:relative;overflow:hidden;transition:.2s;
+  }
+  .news:hover{border-color:var(--border2);transform:translateY(-2px)}
+  .news::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad);opacity:.7}
+  .news .tag{font-size:11px;color:var(--cyan);border:1px solid rgba(34,211,238,.3);border-radius:6px;padding:1px 8px;background:rgba(34,211,238,.07);font-family:var(--mono)}
+  .news .tag.hot{color:var(--pink);border-color:rgba(244,114,182,.35);background:rgba(244,114,182,.07)}
+  .news h3{font-size:14.5px;margin:10px 0 6px;line-height:1.5}
+  .news p{font-size:12.5px;color:var(--muted)}
+  .news .date{font-size:11px;color:var(--dim);margin-top:10px;font-family:var(--mono)}
+  .srcs{margin-top:12px;padding-top:10px;border-top:1px dashed rgba(148,163,184,.18);font-size:11.5px;color:var(--dim);line-height:2}
+  .srcs a{color:var(--cyan);text-decoration:none;margin:0 2px;word-break:break-all}
+  .srcs a:hover{color:#fff;text-decoration:underline}
+
+  /* ========== 模型测评 ========== */
+  .tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .tab{
+    padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);
+    color:var(--muted);font-size:13px;cursor:pointer;transition:.18s;user-select:none;
+  }
+  .tab:hover{color:var(--text);border-color:var(--border2)}
+  .tab.on{color:#06121f;background:var(--grad);border-color:transparent;font-weight:600}
+  .panel{display:none}
+  .panel.on{display:block;animation:fadeUp .35s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .chart{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+  .chart-title{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .chart-title h3{font-size:15px}
+  .chart-title span{font-size:11.5px;color:var(--dim);font-family:var(--mono)}
+  .bar-row{display:grid;grid-template-columns:230px 1fr 62px;gap:12px;align-items:center;padding:6.5px 0}
+  .bar-name{font-size:12.8px;color:var(--text);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar-name .pill{font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:0 6px;margin-left:6px;font-family:var(--mono)}
+  .bar-name .pill.cloud{color:var(--amber);border-color:rgba(251,191,36,.35)}
+  .bar-track{height:14px;background:rgba(148,163,184,.09);border-radius:5px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:5px;width:calc(var(--w) * 1%);background:linear-gradient(90deg,#334155,#475569);transition:width .8s ease}
+  .bar-fill.top{background:linear-gradient(90deg,#10b981,#22d3ee)}
+  .bar-fill.good{background:linear-gradient(90deg,#0ea5e9,#38bdf8)}
+  .bar-fill.mid{background:linear-gradient(90deg,#6366f1,#818cf8)}
+  .bar-fill.low{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+  .bar-fill.bad{background:linear-gradient(90deg,#ef4444,#f87171)}
+  .bar-val{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .bar-val b{color:var(--text);font-weight:600}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;font-size:13px}
+  thead th{
+    text-align:left;padding:11px 14px;background:rgba(148,163,184,.06);color:var(--dim);
+    font-weight:600;font-size:11.5px;letter-spacing:.08em;white-space:nowrap;
+  }
+  tbody td{padding:11px 14px;border-top:1px solid var(--border);color:var(--muted);vertical-align:top}
+  tbody tr:hover td{background:rgba(148,163,184,.045)}
+  td .tname{color:var(--text);font-weight:600;white-space:nowrap}
+  .m{font-family:var(--mono)}
+  .ok{color:var(--green)} .warn{color:var(--amber)} .bad{color:var(--red)}
+
+  /* ========== 开源项目 ========== */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+  .filters{display:flex;gap:7px;flex-wrap:wrap}
+  .fbtn{
+    padding:7px 14px;border-radius:99px;border:1px solid var(--border);background:var(--card);
+    color:var(--muted);font-size:12.5px;cursor:pointer;transition:.18s;
+  }
+  .fbtn:hover{color:var(--text)}
+  .fbtn.on{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.45);color:var(--cyan)}
+  .search{
+    margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--card);
+    border:1px solid var(--border);border-radius:99px;padding:7px 15px;
+  }
+  .search input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:170px}
+  .search input::placeholder{color:var(--dim)}
+  .repo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .repo{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:17px;display:flex;flex-direction:column;gap:10px;transition:.2s;position:relative;
+  }
+  .repo:hover{border-color:var(--border2);transform:translateY(-3px)}
+  .repo-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .repo h3{font-size:14.5px;line-height:1.35}
+  .repo h3 small{display:block;font-weight:400;color:var(--dim);font-size:11px;font-family:var(--mono);margin-top:2px}
+  .stars{display:inline-flex;align-items:center;gap:4px;color:var(--amber);font-family:var(--mono);font-size:12px;white-space:nowrap;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);padding:2px 9px;border-radius:99px}
+  .repo p{font-size:12.5px;color:var(--muted);flex:1}
+  .repo-tags{display:flex;flex-wrap:wrap;gap:5px}
+  .rtag{font-size:10.5px;color:var(--violet);border:1px solid rgba(129,140,248,.3);background:rgba(129,140,248,.07);border-radius:5px;padding:1px 7px}
+  .repo-link{font-size:12px;color:var(--blue);font-family:var(--mono)}
+  .hidden{display:none!important}
+
+  /* ========== 应用产品 ========== */
+  .app-group{margin-bottom:26px}
+  .app-group h3{font-size:15.5px;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+  .app-group h3 .gtag{font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:1px 9px;background:var(--card);font-weight:400}
+  .app-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .app{
+    background:var(--card);border:1px solid var(--border);border-radius:12px;padding:15px 16px;
+    transition:.2s;display:flex;flex-direction:column;gap:7px;
+  }
+  .app:hover{border-color:var(--border2);transform:translateY(-2px)}
+  .app-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .app b{font-size:14px}
+  .app .plat{font-size:10.5px;color:var(--dim);border:1px solid var(--border);border-radius:5px;padding:0 7px;font-family:var(--mono);white-space:nowrap}
+  .app p{font-size:12.3px;color:var(--muted)}
+  .app .hl{font-size:11.5px;color:var(--green);display:flex;gap:5px;align-items:center}
+  .app .hl::before{content:"✦";font-size:9px}
+
+  /* ========== 制作流程 ========== */
+  .pipeline{display:grid;grid-template-columns:repeat(7,1fr);gap:0;margin-top:6px}
+  .stage{
+    position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:15px 14px 13px;min-width:0;
+  }
+  .stage + .stage{margin-left:26px}
+  .stage::before{
+    content:"";position:absolute;left:-26px;top:50%;width:26px;height:2px;
+    background:linear-gradient(90deg,rgba(34,211,238,.15),rgba(34,211,238,.6));
+  }
+  .stage + .stage::after{
+    content:"";position:absolute;left:-26px;top:50%;transform:translateY(-50%) rotate(45deg);
+    width:7px;height:7px;border-top:2px solid rgba(34,211,238,.8);border-right:2px solid rgba(34,211,238,.8);
+  }
+  .stage .no{
+    font-family:var(--mono);font-size:10.5px;color:#06121f;background:var(--grad);
+    width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font-weight:700;
+  }
+  .stage h4{font-size:13.8px;margin:9px 0 5px}
+  .stage p{font-size:11.6px;color:var(--muted);min-height:52px}
+  .stage .tools{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+  .stage .tools span{font-size:10px;color:var(--cyan);border:1px solid rgba(34,211,238,.25);background:rgba(34,211,238,.06);border-radius:4px;padding:1px 6px;font-family:var(--mono)}
+  .stage .who{margin-top:9px;font-size:10.5px;display:flex;gap:6px;align-items:center}
+  .who .ai{color:var(--violet)} .who .hu{color:var(--amber)}
+  .who i{font-style:normal;font-family:var(--mono);border:1px solid var(--border);border-radius:4px;padding:0 5px;font-size:9.5px;color:var(--dim)}
+  .flow-bar{
+    display:flex;gap:2px;margin:18px 0 26px;height:8px;border-radius:99px;overflow:hidden;
+  }
+  .flow-bar span{flex:1}
+  .flow-legend{display:flex;gap:18px;font-size:11.5px;color:var(--dim);flex-wrap:wrap}
+  .flow-legend b{color:var(--muted);font-weight:600}
+  .flow-legend .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+  /* ========== 应用场景 ========== */
+  .scene-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .scene{
+    background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 15px;
+    transition:.2s;
+  }
+  .scene:hover{border-color:var(--border2);transform:translateY(-2px)}
+  .scene .ico{font-size:22px;margin-bottom:8px;display:block}
+  .scene b{font-size:13.6px;display:block;margin-bottom:5px}
+  .scene p{font-size:11.8px;color:var(--muted)}
+  .scene .kpi{margin-top:9px;font-size:10.5px;color:var(--dim);font-family:var(--mono);border-top:1px dashed var(--border);padding-top:8px}
+
+  /* ========== 痛点 ========== */
+  .pain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .pain{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;
+    display:flex;flex-direction:column;gap:9px;transition:.2s;position:relative;overflow:hidden;
+  }
+  .pain:hover{border-color:rgba(248,113,113,.35)}
+  .pain-top{display:flex;justify-content:space-between;align-items:center}
+  .pain h3{font-size:14.5px}
+  .sev{font-size:10.5px;border-radius:5px;padding:1px 8px;font-family:var(--mono);white-space:nowrap}
+  .sev.hi{color:var(--red);background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35)}
+  .sev.mid{color:var(--amber);background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3)}
+  .pain p{font-size:12.5px;color:var(--muted)}
+  .pain .fix{margin-top:auto;background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.2);border-radius:9px;padding:9px 11px}
+  .pain .fix b{font-size:11px;color:var(--green);letter-spacing:.1em;display:block;margin-bottom:4px}
+  .pain .fix span{font-size:11.8px;color:var(--muted)}
+
+  /* ========== 经典案例 ========== */
+  .case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .case{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;
+    display:flex;flex-direction:column;gap:9px;transition:.2s;position:relative;overflow:hidden;
+  }
+  .case:hover{border-color:rgba(34,211,238,.4);transform:translateY(-2px)}
+  .case::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad);opacity:.7}
+  .case-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .case h3{font-size:14.5px;line-height:1.4}
+  .case .dom{font-size:10.5px;color:var(--cyan);border:1px solid rgba(34,211,238,.3);background:rgba(34,211,238,.07);border-radius:5px;padding:1px 8px;font-family:var(--mono);white-space:nowrap}
+  .case p{font-size:12.4px;color:var(--muted)}
+  .case p b{color:var(--text)}
+  .case .lesson{margin-top:auto;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.22);border-radius:9px;padding:9px 11px}
+  .case .lesson b{font-size:11px;color:var(--cyan);letter-spacing:.1em;display:block;margin-bottom:4px}
+  .case .lesson span{font-size:11.8px;color:var(--muted)}
+
+  /* ========== 选型速查 ========== */
+  .guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .guide{
+    background:linear-gradient(160deg,rgba(34,211,238,.06),rgba(129,140,248,.05));
+    border:1px solid var(--border);border-radius:12px;padding:16px 18px;
+  }
+  .guide .need{font-size:11.5px;color:var(--cyan);letter-spacing:.1em;margin-bottom:6px}
+  .guide b{font-size:15px}
+  .guide p{font-size:12.3px;color:var(--muted);margin-top:5px}
+  .guide p code{font-family:var(--mono);font-size:11.5px;color:var(--purple);background:rgba(129,140,248,.08);padding:1px 6px;border-radius:4px}
+
+  /* ========== 页脚 ========== */
+  footer{border-top:1px solid var(--border);margin-top:30px;padding:34px 24px 44px;background:rgba(11,18,32,.45)}
+  .foot-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:30px}
+  footer h4{font-size:13px;margin-bottom:12px;color:var(--text)}
+  footer p,footer li{font-size:12px;color:var(--dim);line-height:2}
+  footer ul{list-style:none}
+  .copyright{max-width:1200px;margin:26px auto 0;padding-top:18px;border-top:1px solid var(--border);font-size:11.5px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+  /* ========== 响应式 ========== */
+  @media (max-width:1080px){
+    .repo-grid{grid-template-columns:repeat(3,1fr)}
+    .scene-grid{grid-template-columns:repeat(3,1fr)}
+    .pipeline{grid-template-columns:repeat(4,1fr);gap:26px 26px}
+    .stage + .stage{margin-left:0}
+    .stage::before,.stage + .stage::after{display:none}
+    .hero{grid-template-columns:1fr}
+    .player{max-width:560px}
+  }
+  @media (max-width:820px){
+    .news-grid{grid-template-columns:1fr 1fr}
+    .app-grid{grid-template-columns:1fr 1fr}
+    .pain-grid{grid-template-columns:1fr 1fr}
+    .case-grid{grid-template-columns:1fr 1fr}
+    .guide-grid{grid-template-columns:1fr}
+    .bar-row{grid-template-columns:150px 1fr 52px}
+    .search{margin-left:0;width:100%}
+    .search input{width:100%}
+    .toolbar{flex-direction:column;align-items:stretch}
+  }
+  @media (max-width:600px){
+    .repo-grid,.news-grid,.app-grid,.pain-grid,.case-grid{grid-template-columns:1fr}
+    .scene-grid{grid-template-columns:1fr 1fr}
+    .pipeline{grid-template-columns:1fr 1fr}
+    .bar-row{grid-template-columns:1fr;gap:4px}
+    .bar-name{text-align:left}
+    .bar-val{text-align:left}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 导航 ================= -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo"><span class="dot">字</span>SubTrans<em>·Hub</em></div>
+    <div class="nav-links" id="navLinks">
+      <a href="#news">资讯速览</a>
+      <a href="#market">市场动向</a>
+      <a href="#models">模型测评</a>
+      <a href="#oss">开源项目</a>
+      <a href="#apps">应用产品</a>
+      <a href="#cases">案例策略</a>
+      <a href="#pipeline">制作流程</a>
+      <a href="#specs">字幕规范</a>
+      <a href="#scenes">应用场景</a>
+      <a href="#pains">痛点全景</a>
+      <a href="#papers">学术文献</a>
+      <a href="#guide">选型速查</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ================= Hero ================= -->
+<header class="hero">
+  <div>
+    <span class="kicker"><span class="pulse"></span>AI SUBTITLE × TRANSLATION · 数据截至 2026-08 · 每两周更新</span>
+    <h1>字幕与翻译<br><span class="grad">AI 工具库 & 资讯看板</span></h1>
+    <p class="lead">一站式纵览语音识别与字幕翻译生态:通用与小语种模型精度榜单、语音翻译技术路线、精准打轴(强制对齐)方案、高星开源项目与应用产品、经典案例与平台策略、AI 字幕制作全流程与痛点,并附影视字幕规范参考(平台 / 广电行业 / 广播技术 / 无障碍)与学术文献速览。</p>
+    <div class="chips">
+      <div class="stat"><b>40<i>+</i></b><span>测评模型</span></div>
+      <div class="stat"><b>20<i>+</i></b><span>高星开源项目</span></div>
+      <div class="stat"><b>20<i>+</i></b><span>应用产品</span></div>
+      <div class="stat"><b>12</b><span>痛点 · 对策</span></div>
+      <div class="stat"><b>10</b><span>学术文献</span></div>
+      <div class="stat"><b>12<i>+</i></b><span>规范 · 标准</span></div>
+      <div class="stat"><b>12</b><span>经典案例</span></div>
+      <div class="stat"><b>$65<i>B</i></b><span>语言服务市场 2026</span></div>
+    </div>
+    <div class="hero-meta">
+      <span>数据源:HuggingFace Open ASR Leaderboard / GigaSpeechBench / Qwen3-ASR 技术报告 / GitHub</span>
+      <span style="margin-left:14px">更新周期:每两周刷新一次榜单与市场数据</span>
+    </div>
+  </div>
+
+  <!-- 装饰:模拟字幕播放器 -->
+  <div class="player" aria-hidden="true">
+    <div class="screen">
+      <div class="subs">
+        <span class="badge-live">● LIVE 实时字幕 · 延迟 92ms</span>
+        <div class="zh" id="subZh">这是由 AI 实时生成的双语字幕</div>
+        <div class="en" id="subEn">[00:12.340 → 00:15.860] Realtime bilingual captions generated by AI</div>
+      </div>
+    </div>
+    <div class="wave" id="wave"></div>
+    <div class="pbar"><i></i></div>
+    <div class="player-foot"><span>WHISPERX · QWEN3-ASR</span><span>01:24 / 02:11</span></div>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= 01 资讯速览 ================= -->
+<section id="news" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 01 · NEWS</div>
+    <h2>资讯速览</h2>
+    <p>近期值得关注的模型发布、榜单变化与行业动向。</p>
+  </div>
+  <div class="news-grid">
+    <div class="news">
+      <span class="tag hot">NEW MODEL</span>
+      <h3>Qwen3-ASR 家族发布:52 语种 / 22 方言 + NAR 强制对齐</h3>
+      <p>1.7B 版本为开源 SOTA 级、0.6B 版本 TTFT 低至 92ms(并发 128 时 1 秒转写 2000 秒语音),并附带超越三大主流对齐器的 Qwen3-ForcedAligner,Apache 2.0 开源。</p>
+      <div class="date">2026-01 · Qwen3-ASR 技术报告</div>
+      <div class="srcs">来源:<a href="https://github.com/QwenLM/Qwen3-ASR" target="_blank" rel="noopener">GitHub 仓库</a> · <a href="https://qwen.ai/blog?id=qwen3asr" target="_blank" rel="noopener">Qwen 官方博客</a> · <a href="https://arxiv.org/abs/2601.21337" target="_blank" rel="noopener">技术报告 arXiv:2601.21337</a></div>
+    </div>
+    <div class="news">
+      <span class="tag">LEADERBOARD</span>
+      <h3>Granite Speech 4.1 2B 登顶 HF Open ASR 榜单</h3>
+      <p>以 5.33% 平均 WER(8 大英文数据集)成为开源第一;开源模型已整体超越多数商用 API,LibriSpeech 类"朗读语音"已饱和,差距拉开在会议/电话/噪声场景。</p>
+      <div class="date">2026-05 · HF Open ASR Leaderboard</div>
+      <div class="srcs">来源:<a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard" target="_blank" rel="noopener">HF Open ASR 榜单</a> · <a href="https://huggingface.co/ibm-granite/granite-speech-4.1-2b" target="_blank" rel="noopener">Granite Speech 4.1 模型卡</a></div>
+    </div>
+    <div class="news">
+      <span class="tag">BENCHMARK</span>
+      <h3>GigaSpeechBench:真实世界 ASR 评测基准发布</h3>
+      <p>680 小时人工标注,覆盖 12 门中东/东南亚低资源语言、6 种中文方言、6 种英语口音、12 个垂直领域与老人/儿童语音——揭示垂域场景 WER 较标准榜单成倍劣化。</p>
+      <div class="date">2026-06 · arXiv:2606.28884</div>
+      <div class="srcs">来源:<a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">arXiv:2606.28884</a> · <a href="https://huggingface.co/datasets/amphion/gigaspeechbench" target="_blank" rel="noopener">数据集(HuggingFace)</a></div>
+    </div>
+    <div class="news">
+      <span class="tag">CHINESE</span>
+      <h3>FireRedASR-AED:中文 CER 0.57% 精度标杆</h3>
+      <p>1.1B 参数即实现中文识别精度天花板,但仅支持中文;多语种场景仍需 Qwen3-ASR / Whisper 等兜底,热词定制是其另一大优势。</p>
+      <div class="date">持续更新 · FireRedTeam</div>
+      <div class="srcs">来源:<a href="https://github.com/FireRedTeam/FireRedASR" target="_blank" rel="noopener">GitHub 仓库</a></div>
+    </div>
+    <div class="news">
+      <span class="tag">OPEN SOURCE</span>
+      <h3>VideoLingo 突破 18k Stars:Netflix 级字幕管线开源化</h3>
+      <p>剪句、翻译、对齐、配音一键完成,验证了"WhisperX + LLM + 规范引擎"的开源完整链路可行;pyvideotrans、YouDub 等同类项目共同繁荣。</p>
+      <div class="date">2026-07 · GitHub</div>
+      <div class="srcs">来源:<a href="https://github.com/Huanshere/VideoLingo" target="_blank" rel="noopener">VideoLingo 仓库</a> · <a href="https://github.com/jianchang512/pyvideotrans" target="_blank" rel="noopener">pyvideotrans 仓库</a></div>
+    </div>
+    <div class="news">
+      <span class="tag">TREND</span>
+      <h3>趋势:ASR 与 LLM 深度融合,实时字幕门槛大幅下降</h3>
+      <p>语音-大模型一体化架构(Qwen3-ASR、Voxtral、Granite Speech)取代传统 E2E 范式;上下文偏置(context biasing)让术语、热词纠错成为标配能力。</p>
+      <div class="date">2026 趋势观察</div>
+      <div class="srcs">来源:<a href="https://arxiv.org/abs/2507.12658" target="_blank" rel="noopener">Voxtral 论文</a> · <a href="https://arxiv.org/abs/2601.21337" target="_blank" rel="noopener">Qwen3-ASR 论文</a> · <a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard" target="_blank" rel="noopener">HF 榜单趋势</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 市场动向 ================= -->
+<section id="market" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 02 · MARKET</div>
+    <h2>市场动向</h2>
+    <p>字幕 / 翻译 / 本地化赛道的市场规模、资本动态、平台渗透与商业模式变迁——AI 正把"翻译墙"变成基础设施。各机构口径不同,数据为约值。</p>
+  </div>
+
+  <!-- 市场规模对比 -->
+  <div class="chart">
+    <div class="chart-title">
+      <h3>细分市场规模与增速(对数感受示意)</h3>
+      <span>条形长度 ∝ 市场规模 · 数字为 2025 年基数 / 预测终值 · 增速为年复合增长率</span>
+    </div>
+    <div class="bar-row"><div class="bar-name">语言服务总市场<span class="pill">$65.5B · 稳态</span></div><div class="bar-track"><div class="bar-fill low" style="--w:100"></div></div><div class="bar-val">CAGR ~5–7%</div></div>
+    <div class="bar-row"><div class="bar-name">视频本地化(配音+字幕)<span class="pill">$13.1B → 2030 $20B+</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:25"></div></div><div class="bar-val">CAGR ~7%</div></div>
+    <div class="bar-row"><div class="bar-name">字幕与配制解决方案<span class="pill">Verbit / 3Play / Rev</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:12.5"></div></div><div class="bar-val"><b>$6.5B</b> → $13.3B</div></div>
+    <div class="bar-row"><div class="bar-name">AI 字幕翻译器<span class="pill">云部署 69%</span></div><div class="bar-track"><div class="bar-fill good" style="--w:2"></div></div><div class="bar-val"><b>$1.03B</b> → $3.5B</div></div>
+    <div class="bar-row"><div class="bar-name">AI 语言翻译<span class="pill">增速最快之一</span></div><div class="bar-track"><div class="bar-fill good" style="--w:0.7"></div></div><div class="bar-val"><b>$3.68B</b> · 25.2%</div></div>
+    <div class="bar-row"><div class="bar-name">AI 配音与本地化<span class="pill">CAGR 最高</span></div><div class="bar-track"><div class="bar-fill top" style="--w:0.6"></div></div><div class="bar-val"><b>$0.6B</b> → $8.2B · <b>29.8%</b></div></div>
+    <div class="bar-row"><div class="bar-name">中国 AI 字幕翻译器<span class="pill">2026E ¥61.5 亿</span></div><div class="bar-track"><div class="bar-fill top" style="--w:0.6"></div></div><div class="bar-val">YoY <b>+28.4%</b></div></div>
+    <div class="note">口径提示:不同报告对"字幕 / 翻译 / 本地化"边界定义不同,规模差异大(AI 配音含配音不含纯文本翻译;语言服务含口译与培训)。共同结论:AI 相关细分增速(19%–30%)显著高于传统语言服务整体(5%–7%),预算正在从"按字付费的人工翻译"迁移到"AI 初稿 + 人工审校"的混合工作流(MTPE 采用率已达 46%,2022 年仅 26%)。</div>
+  </div>
+
+  <div style="height:22px"></div>
+
+  <!-- 资本与玩家 -->
+  <div class="sec-sub-h">资本与头部玩家</div>
+  <div class="news-grid" style="margin-top:12px">
+    <div class="news">
+      <span class="tag hot">SERIES D · $500M</span>
+      <h3>ElevenLabs 估值 110 亿美元:语音 AI 全栈化</h3>
+      <p>2026-02 完成 5 亿美元 D 轮(Sequoia 领投,a16z 四倍加注,总融资 7.81 亿)。2025 年末 ARR 3.3 亿美元,2026-06 估达 6 亿;财富 500 强渗透 41%。收入结构:企业语音代理 ~32% / API ~26% / 消费订阅 ~20% / <b>配音与本地化 ~12%</b> / 声音授权 ~10%——配音与字幕翻译已成其第四大收入支柱,目标 2–3 年内 IPO。<a href="https://elevenlabs.io/blog/series-d" target="_blank" rel="noopener">官方公告 ↗</a></p>
+      <div class="date">2026-02 · 估值一年内 3 倍+</div>
+    </div>
+    <div class="news">
+      <span class="tag">行业洗牌</span>
+      <h3>语言服务市场"V 型反弹",按字计费模式崩塌</h3>
+      <p>2023 年语言服务市场十年首跌(−4.5%,通胀 + 生成式 AI + 价格战三重打击,实际规模较 2019 峰值低 16.3%),2026 年反弹至 655 亿美元。CSA Research:基础笔译收入下滑,而本地化、MTPE、多语内容与 AI 集成收入增长——"译得好"的商业模式已死,"帮客户进入新市场"的模式在赢。<a href="https://csa-research.com/Blogs-Events/Blog/The-Language-Sector-Slowdown-A-Multifaceted-Outlook" target="_blank" rel="noopener">CSA Research ↗</a></p>
+      <div class="date">2026 · 市场没缩水,在重新分配</div>
+    </div>
+    <div class="news">
+      <span class="tag">传统玩家</span>
+      <h3>字幕解决方案商的 AI 转型竞赛</h3>
+      <p>Verbit、3Play Media、Rev、Ai-Media、VITAC 等传统字幕商占据 65 亿美元配制市场,正集体从"人工字幕"转向"AI 初稿 + 人工 QA"混合模式(AI-Hybrid Captioning);无障碍法规(FCC / 欧洲无障碍法案)持续为直播与点播字幕创造合规刚需。</p>
+      <div class="date">Data Bridge · 市场预测至 2033</div>
+    </div>
+  </div>
+
+  <div style="height:22px"></div>
+
+  <!-- 平台渗透 -->
+  <div class="sec-sub-h">平台渗透与成本坍缩</div>
+  <div class="guide-grid" style="margin-top:12px">
+    <div class="guide">
+      <div class="need">渗透率</div>
+      <b>58% 流媒体已部署 AI 配音</b>
+      <p>2026-06 全球流媒体平台渗透率 58%(2022 年仅 12%);82% 的 10 万+ 粉 YouTube 创作者在用 AI 配音(2022 年 18%)。亚太渗透 54% 领跑。</p>
+    </div>
+    <div class="guide">
+      <div class="need">YouTube</div>
+      <b>自动配音:27 语 · 日活 600 万观众</b>
+      <p>Google Gemini 驱动的自动配音已扩至 27 语言,每日 600 万观众消费自动配音内容;短视频占全球 AI 配音用量约 1/3。</p>
+    </div>
+    <div class="guide">
+      <div class="need">成本</div>
+      <b>每分钟 $12–18 → $2.1–3.4</b>
+      <p>2022–2026 每分钟音频处理成本下降约 80%;延迟从约 1 分钟/分钟降到 3–5 秒,实时本地化(体育直播、互动直播)成为可能。</p>
+    </div>
+    <div class="guide">
+      <div class="need">形态</div>
+      <b>从"字幕"到"配音 + 唇形同步"</b>
+      <p>市场从纯文本翻译转向多模态生成:字幕 + 唇形同步配音 + 实时流式翻译一体交付;北美占最大份额,亚太增速最快。</p>
+    </div>
+  </div>
+
+  <div style="height:22px"></div>
+
+  <!-- 出海短剧 -->
+  <div class="sec-sub-h">出海短剧:AI 译制最大增量场景</div>
+  <div class="news-grid" style="margin-top:12px">
+    <div class="news">
+      <span class="tag hot">市场规模</span>
+      <h3>AI 短剧 / 漫剧出海:1 亿 → 6.5 亿美元(一年 6.5 倍)</h3>
+      <p>Dataeye:AI 短剧漫剧海外市场 2025 年约 1 亿美元,2026 年预计达 6.5 亿美元;海外 AI 短剧活跃用户超 1.5 亿,北美贡献约 40% 收入。谷歌调查:超 50% 海外用户愿意为 AI 短剧付费。<a href="https://news.hubeidaily.net/pc/c_5531325.html" target="_blank" rel="noopener">湖北日报深度报道 ↗</a></p>
+      <div class="date">Dataeye · 2026-05</div>
+    </div>
+    <div class="news">
+      <span class="tag">译制革命</span>
+      <h3>译制成本降 90%:120 分钟剧集 3 天 → 4–5 小时</h3>
+      <p>AI 译制把单部 120 分钟剧集从人工 3 天压缩到 4–5 小时,成本下降 90%+,准确率 95%+;多语种同步上线使发行周期从周级压缩到天级。3000 元制作的 AI 短剧《波斯复仇记》海外上线 72 小时付费 50 万美元。</p>
+      <div class="date">2026-05 · 湖北日报</div>
+    </div>
+    <div class="news">
+      <span class="tag">平台矩阵</span>
+      <h3>分发生态:DramaBox / ReelShort / iDrama / TikTok</h3>
+      <p>头部玩家:昆仑万维 AI 短剧平台 ARR 8.1 亿美元(环比 +42%),7 月上新 90%+ 为 AI 生成;TikTok 2026Q1 短剧分成 2400 万美元(AI 短剧季度增幅 6 倍);字节小云雀、腾讯 OnSolo、OiiOii"一键出海"相继入局。浙江星橙传媒 2026 年 1–7 月完成 1200+ 部短剧 AI 多语改编(全年预计 2200+ 部)。<a href="http://www.ezhejiang.gov.cn/equzhou/2026-08/07/c_1203246.htm" target="_blank" rel="noopener">China Daily 报道 ↗</a></p>
+      <div class="date">2026-08 · 出海基础设施成型</div>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:18px">信号解读:字幕与翻译正从"成本中心"变成"收入杠杆"——出海短剧证明了 AI 译制能把内容分发周期压到天级,边际成本趋近零;而 ElevenLabs 的收入结构说明"配音+本地化"已是可以独立支撑估值(110 亿美元)的商业品类。行业真正的分水岭不是"AI 能不能翻",而是"谁掌握了分发"。</div>
+</section>
+
+<!-- ================= 03 模型测评 ================= -->
+<section id="models" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 03 · BENCHMARKS</div>
+    <h2>模型测评</h2>
+    <p>六个视角对比:英文开源榜、中文榜、小语种与方言、语音翻译(S2TT)、精准打轴(强制对齐)、商用 API。WER / CER / AAS(时间戳偏移)<strong>越低越好</strong>;BLEU / chrF 越高越好。</p>
+  </div>
+
+  <div class="tabs" id="modelTabs">
+    <div class="tab on" data-tab="en">英文 · 开源榜 WER</div>
+    <div class="tab" data-tab="zh">中文 · 开源榜 CER</div>
+    <div class="tab" data-tab="low">小语种 · 方言</div>
+    <div class="tab" data-tab="ast">语音翻译 · S2TT</div>
+    <div class="tab" data-tab="fa">打轴 · 强制对齐</div>
+    <div class="tab" data-tab="api">商用 API · 能力对照</div>
+  </div>
+
+  <!-- 英文榜 -->
+  <div class="panel on" data-panel="en">
+    <div class="chart">
+      <div class="chart-title">
+        <h3>HF Open ASR Leaderboard(en_shortform)</h3>
+        <span>平均 WER% · 条形长度≈错误率(越短越好) · 2026-05 快照</span>
+      </div>
+      <!-- 条宽 = WER/10*100,直接线性映射 -->
+      <div class="bar-row"><div class="bar-name">Granite Speech 4.1 2B<span class="pill">IBM</span></div><div class="bar-track"><div class="bar-fill top" style="--w:53.3"></div></div><div class="bar-val"><b>5.33</b></div></div>
+      <div class="bar-row"><div class="bar-name">Cohere Transcribe<span class="pill">Cohere</span></div><div class="bar-track"><div class="bar-fill top" style="--w:54.2"></div></div><div class="bar-val"><b>5.42</b></div></div>
+      <div class="bar-row"><div class="bar-name">Granite 4.0 1B Speech<span class="pill">IBM</span></div><div class="bar-track"><div class="bar-fill top" style="--w:55.2"></div></div><div class="bar-val"><b>5.52</b></div></div>
+      <div class="bar-row"><div class="bar-name">Canary-Qwen 2.5B<span class="pill">NVIDIA</span></div><div class="bar-track"><div class="bar-fill good" style="--w:56.3"></div></div><div class="bar-val"><b>5.63</b></div></div>
+      <div class="bar-row"><div class="bar-name">Granite Speech 3.3 8B<span class="pill">IBM</span></div><div class="bar-track"><div class="bar-fill good" style="--w:57.4"></div></div><div class="bar-val"><b>5.74</b></div></div>
+      <div class="bar-row"><div class="bar-name">Qwen3-ASR-1.7B<span class="pill">Alibaba</span></div><div class="bar-track"><div class="bar-fill good" style="--w:57.6"></div></div><div class="bar-val"><b>5.76</b></div></div>
+      <div class="bar-row"><div class="bar-name">Scribe v2<span class="pill cloud">ElevenLabs·云</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:58.3"></div></div><div class="bar-val"><b>5.83</b></div></div>
+      <div class="bar-row"><div class="bar-name">Phi-4 Multimodal<span class="pill">Microsoft</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:60.2"></div></div><div class="bar-val"><b>6.02</b></div></div>
+      <div class="bar-row"><div class="bar-name">Parakeet TDT 0.6B v2<span class="pill">NVIDIA</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:60.5"></div></div><div class="bar-val"><b>6.05</b></div></div>
+      <div class="bar-row"><div class="bar-name">Voxtral Small 24B<span class="pill">Mistral</span></div><div class="bar-track"><div class="bar-fill low" style="--w:66.2"></div></div><div class="bar-val"><b>6.62</b></div></div>
+      <div class="bar-row"><div class="bar-name">Whisper Large v3<span class="pill">OpenAI</span></div><div class="bar-track"><div class="bar-fill low" style="--w:74.4"></div></div><div class="bar-val"><b>7.44</b></div></div>
+      <div class="bar-row"><div class="bar-name">Whisper Large v3 Turbo<span class="pill">OpenAI</span></div><div class="bar-track"><div class="bar-fill low" style="--w:78.3"></div></div><div class="bar-val"><b>7.83</b></div></div>
+      <div class="note">榜单多为朗读/广播语音;真实会议、多人重叠、口音场景下差距会被放大(见 GigaSpeechBench)。Whisper 虽精度落后,但语言覆盖(99+)与生态仍无可替代。</div>
+      <div class="srcs">榜单与数字来源:<a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard" target="_blank" rel="noopener">HF Open ASR Leaderboard</a> · <a href="https://www.gladia.io/blog/best-open-source-speech-to-text-models" target="_blank" rel="noopener">Gladia 2026 开源模型盘点</a> · <a href="https://www.codesota.com/speech-to-text" target="_blank" rel="noopener">Speech-to-Text WER 汇总</a></div>
+    </div>
+  </div>
+
+  <!-- 中文榜 -->
+  <div class="panel" data-panel="zh">
+    <div class="chart">
+      <div class="chart-title">
+        <h3>中文识别 · CER%(常用中文测试集汇总)</h3>
+        <span>越短越好 · 条形宽度做了最小值保底 · 口径以各官方报告为准</span>
+      </div>
+      <div class="bar-row"><div class="bar-name">FireRedASR-AED<span class="pill">小红书 · 1.1B</span></div><div class="bar-track"><div class="bar-fill top" style="--w:4.7"></div></div><div class="bar-val"><b>0.57</b></div></div>
+      <div class="bar-row"><div class="bar-name">Qwen3-ASR-1.7B<span class="pill">阿里 · 52 语种</span></div><div class="bar-track"><div class="bar-fill top" style="--w:12.3"></div></div><div class="bar-val"><b>1.48</b></div></div>
+      <div class="bar-row"><div class="bar-name">Paraformer-zh<span class="pill">阿里 · 220M</span></div><div class="bar-track"><div class="bar-fill good" style="--w:16.2"></div></div><div class="bar-val"><b>1.95</b></div></div>
+      <div class="bar-row"><div class="bar-name">SenseVoice-Small<span class="pill">阿里 · 234M</span></div><div class="bar-track"><div class="bar-fill good" style="--w:17.9"></div></div><div class="bar-val"><b>2.15</b></div></div>
+      <div class="bar-row"><div class="bar-name">FireRedASR-LoRA<span class="pill">小红书 · 轻量</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:29.1"></div></div><div class="bar-val"><b>2.91</b></div></div>
+      <div class="bar-row"><div class="bar-name">Whisper large-v3<span class="pill">OpenAI</span></div><div class="bar-track"><div class="bar-fill low" style="--w:74"></div></div><div class="bar-val">≈<b>9</b></div></div>
+      <div class="note">不同测试集(AISHELL / WenetSpeech / 方言集)结果差异显著,以上为公开报告典型值。中文首选国产模型:FireRedASR 求精度、Qwen3-ASR 求多语种+方言、Paraformer 求流式速度、SenseVoice 附带情感/事件检测。</div>
+    </div>
+    <div style="height:14px"></div>
+    <table>
+      <thead><tr><th>模型</th><th>参数量</th><th>特色能力</th><th>适用场景</th><th>短板</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tname">FireRedASR-AED</span></td><td class="m">1.1B</td><td class="ok">中文 CER 0.57% 天花板;支持热词定制</td><td>影视/课程等高精度中文字幕</td><td class="warn">仅中文</td></tr>
+        <tr><td><span class="tname">Qwen3-ASR</span></td><td class="m">0.6B / 1.7B</td><td class="ok">52 语种+22 方言;流式 TTFT 92ms;附带 ForcedAligner</td><td>多语种、方言、实时字幕</td><td class="warn">英文榜略逊于 Granite/Canary</td></tr>
+        <tr><td><span class="tname">Paraformer-zh</span></td><td class="m">220M</td><td class="ok">非自回归架构,极快,支持流式</td><td>直播/实时双语字幕</td><td class="warn">多语种弱</td></tr>
+        <tr><td><span class="tname">SenseVoice-Small</span></td><td class="m">234M</td><td class="ok">识别+情感+音频事件(掌声/笑声),推理极快</td><td>需要语气标记的字幕、内容理解</td><td class="warn">无时间戳(需搭配对齐器)</td></tr>
+        <tr><td><span class="tname">Whisper 系列</span></td><td class="m">39M–1.55B</td><td class="ok">99+ 语言;生态最丰富;MIT 协议</td><td>多语种兜底、快速原型</td><td class="bad">中文 CER≈9%;静音段幻觉;时间戳粗</td></tr>
+      </tbody>
+    </table>
+    <div class="srcs">来源:<a href="https://github.com/FireRedTeam/FireRedASR" target="_blank" rel="noopener">FireRedASR 仓库</a> · <a href="https://arxiv.org/abs/2601.21337" target="_blank" rel="noopener">Qwen3-ASR 技术报告</a> · <a href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener">FunASR(Paraformer / SenseVoice)</a> · <a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">GigaSpeechBench</a></div>
+  </div>
+
+  <!-- 小语种与方言 -->
+  <div class="panel" data-panel="low">
+    <div class="chart">
+      <div class="chart-title">
+        <h3>极端低资源案例 · 爱尔兰语 WER%(BlasBench / Common Voice)</h3>
+        <span>越低越好 · 自然语音(FLEURS)上 Azure 57.5% / Omnilingual 39.1% / Whisper 崩坏</span>
+      </div>
+      <div class="bar-row"><div class="bar-name">ABAIR Fotheidil<span class="pill">定制系统</span></div><div class="bar-track"><div class="bar-fill top" style="--w:9.8"></div></div><div class="bar-val"><b>10.9</b></div></div>
+      <div class="bar-row"><div class="bar-name">Microsoft Azure<span class="pill cloud">云 API</span></div><div class="bar-track"><div class="bar-fill good" style="--w:20"></div></div><div class="bar-val"><b>22.2</b></div></div>
+      <div class="bar-row"><div class="bar-name">Omnilingual ASR 7B<span class="pill">开源最佳</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:27.6"></div></div><div class="bar-val"><b>30.65</b></div></div>
+      <div class="bar-row"><div class="bar-name">Whisper 全系版本<span class="pill">幻觉崩坏</span></div><div class="bar-track"><div class="bar-fill bad" style="--w:100"></div></div><div class="bar-val bad"><b>&gt;100</b></div></div>
+      <div class="note">Whisper 在爱尔兰语上因"插入式幻觉"输出多于参考文本的 token,WER 超 100%(large-v3-turbo 在 FLEURS 上插入率高达 491%);单一朗读语音基准会高估 33–43 个点。极端低资源语必须先跑真实场景基准再选型。</div>
+    </div>
+    <div style="height:14px"></div>
+    <table>
+      <thead><tr><th>模型 / 服务</th><th>语言覆盖</th><th>小语种 &amp; 方言要点</th><th>许可 / 限制</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tname">Qwen3-ASR</span></td><td class="m">30 语言 + 22 中文方言</td><td class="ok">吴语/闽南语/港澳粤语等方言 SOTA;覆盖中东与东南亚语言</td><td>Apache 2.0</td></tr>
+        <tr><td><span class="tname">ElevenLabs Scribe v2</span></td><td class="m">90+ 语言</td><td class="ok">标准基准 WER 1.7–3.9%;支持 1000 词热词提示;实时延迟约 150ms</td><td>商用 API</td></tr>
+        <tr><td><span class="tname">Whisper</span></td><td class="m">98 语言</td><td class="warn">覆盖广但严重不均,低资源语幻觉重(爱尔兰语 &gt;100% WER)</td><td>MIT</td></tr>
+        <tr><td><span class="tname">MMS(Meta)</span></td><td class="m">1100+ 语言</td><td class="ok">覆盖之王,附带对齐器支持 1130+ 语言;精度让位于广度</td><td class="warn">CC-BY-NC 4.0</td></tr>
+        <tr><td><span class="tname">SeamlessM4T v2</span></td><td class="m">约 100 入 / 96 文本出</td><td class="ok">低资源语对(约鲁巴/孟加拉/缅甸)增益最大</td><td class="bad">权重非商用</td></tr>
+        <tr><td><span class="tname">CAMB.AI</span></td><td class="m">150+ 语言</td><td class="ok">转写+翻译+配音一体化商用管线,覆盖 99% 说话人口</td><td>商用 API</td></tr>
+        <tr><td><span class="tname">国内云(讯飞/火山等)</span></td><td class="m">中文方言 + 维/藏等</td><td class="ok">国内小语种与方言深耕,按时长计费成熟</td><td>商用 API</td></tr>
+      </tbody>
+    </table>
+    <div class="note">选型建议:先在 GigaSpeechBench(12 门中东/东南亚低资源语 + 6 种中文方言)或目标语专属基准上复测;识字覆盖看 MMS,精度看 Qwen3-ASR / Scribe v2,商用闭环看 CAMB.AI。</div>
+    <div class="srcs">来源:<a href="https://arxiv.org/abs/2604.10736" target="_blank" rel="noopener">BlasBench 爱尔兰语基准</a> · <a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">GigaSpeechBench</a> · <a href="https://github.com/facebookresearch/fairseq/tree/main/examples/mms" target="_blank" rel="noopener">Meta MMS</a> · <a href="https://github.com/facebookresearch/seamless_communication" target="_blank" rel="noopener">SeamlessM4T 仓库</a> · <a href="https://www.camb.ai/de/blog-post/speech-to-text-api-benchmark-whisper-vs-elevenlabs-vs-camb-ai-accuracy-latency" target="_blank" rel="noopener">CAMB.AI 多语 API 基准</a></div>
+  </div>
+
+  <!-- 语音翻译 -->
+  <div class="panel" data-panel="ast">
+    <div class="chart">
+      <div class="chart-title">
+        <h3>CoVoST-2 S2TT 平均分(英 → 10 语)</h3>
+        <span>chrF,越高越好 · 本图条形越长越好 · From Tower to Spire 论文口径</span>
+      </div>
+      <div class="bar-row"><div class="bar-name">Spire(自级联)<span class="pill">Tower+语音</span></div><div class="bar-track"><div class="bar-fill top" style="--w:85.2"></div></div><div class="bar-val"><b>85.2</b></div></div>
+      <div class="bar-row"><div class="bar-name">SeamlessM4T v2(直译)<span class="pill">Meta</span></div><div class="bar-track"><div class="bar-fill good" style="--w:84.6"></div></div><div class="bar-val"><b>84.6</b></div></div>
+      <div class="bar-row"><div class="bar-name">Spire(直译)<span class="pill">Tower+语音</span></div><div class="bar-track"><div class="bar-fill good" style="--w:81.3"></div></div><div class="bar-val"><b>81.3</b></div></div>
+      <div class="bar-row"><div class="bar-name">Qwen2-Audio(直译)<span class="pill">阿里</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:79"></div></div><div class="bar-val"><b>79.0</b></div></div>
+      <div class="bar-row"><div class="bar-name">SeamlessM4T(自级联)<span class="pill">Meta</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:75.5"></div></div><div class="bar-val"><b>75.5</b></div></div>
+      <div class="bar-row"><div class="bar-name">SALMONN(直译)<span class="pill">清华/字节</span></div><div class="bar-track"><div class="bar-fill low" style="--w:73.7"></div></div><div class="bar-val"><b>73.7</b></div></div>
+    </div>
+    <div style="height:14px"></div>
+    <table>
+      <thead><tr><th>系统</th><th>技术路线</th><th>关键结果</th><th>亮点 / 限制</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tname">SeamlessM4T v2</span></td><td>UnitY2 一体化(S2ST/S2TT/T2ST/T2TT)</td><td class="ok">WMT22 文本翻译 31.2 BLEU;流式版延迟约 1.8s</td><td class="warn">约 100 语言;权重 CC-BY-NC 非商用</td></tr>
+        <tr><td><span class="tname">Spire</span></td><td>翻译专精 LLM(Tower)+ 语音离散化继续预训练</td><td class="ok">仅 42.5K 小时语音即超越 SeamlessM4T,且保留文本翻译能力</td><td>"语音作为又一门语言"的低成本路线</td></tr>
+        <tr><td><span class="tname">CoT-ST</span></td><td>多模态思维链(先转写、后翻译)</td><td class="ok">CoVoST-2 en-zh 45.2→47.7 BLEU;MuST-C en-zh 19.6→21.2</td><td>LLM 推理可有效吸收级联误差</td></tr>
+        <tr><td><span class="tname">GPT-4o / Claude / DeepSeek</span></td><td>级联:ASR → LLM 字幕翻译</td><td class="ok">术语表+体例约束+长度校验后接近人工水平</td><td class="warn">字幕行长/CPS 仍需硬校验兜底</td></tr>
+        <tr><td><span class="tname">GigaSpeechBench AST</span></td><td>评测基准(11 语人工中英译文)</td><td class="warn">商用 API 真实场景语音翻译劣化显著</td><td>选型前先按目标语复测</td></tr>
+      </tbody>
+    </table>
+    <div class="note">端到端 S2TT 减少 ASR 误差传播,但字幕体例(行长、CPS、口语化)仍需 LLM 后处理;生产环境主流仍是"ASR → LLM 字幕体例翻译"的级联管线。</div>
+    <div class="srcs">来源:<a href="https://arxiv.org/abs/2503.10620" target="_blank" rel="noopener">From Tower to Spire(arXiv:2503.10620)</a> · <a href="https://arxiv.org/abs/2409.19510" target="_blank" rel="noopener">CoT-ST(arXiv:2409.19510)</a> · <a href="https://github.com/facebookresearch/seamless_communication" target="_blank" rel="noopener">SeamlessM4T 仓库</a> · <a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">GigaSpeechBench AST</a></div>
+  </div>
+
+  <!-- 打轴:强制对齐 -->
+  <div class="panel" data-panel="fa">
+    <div class="chart">
+      <div class="chart-title">
+        <h3>对齐精度 · 时间戳偏移(毫秒,越低越好)</h3>
+        <span>各口径来自官方报告与社区实测,量级对比仅供参考</span>
+      </div>
+      <div class="bar-row"><div class="bar-name">Qwen3-ForcedAligner<span class="pill">AAS·官方</span></div><div class="bar-track"><div class="bar-fill top" style="--w:4.8"></div></div><div class="bar-val"><b>4.4</b> ms</div></div>
+      <div class="bar-row"><div class="bar-name">MFA 3.0<span class="pill">边界误差·官方</span></div><div class="bar-track"><div class="bar-fill good" style="--w:16.5"></div></div><div class="bar-val"><b>15</b> ms</div></div>
+      <div class="bar-row"><div class="bar-name">Qwen3-FA 字级实测<span class="pill">社区·口音中文</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:55"></div></div><div class="bar-val"><b>50</b> ms</div></div>
+      <div class="bar-row"><div class="bar-name">WhisperX 字级实测<span class="pill">社区·同环境</span></div><div class="bar-track"><div class="bar-fill low" style="--w:88"></div></div><div class="bar-val"><b>80</b> ms</div></div>
+      <div class="note">Qwen3-ForcedAligner 官方 AAS 评测超越 NeMo-Forced-Aligner 等三大对齐器;MFA 3.0 在四个基准上平均边界误差 &lt;15ms 达 SOTA/近 SOTA。学术对照(TIMIT/Buckeye)显示经典 MFA 的词对齐仍优于 WhisperX/MMS——"传统未死,范式更替正在发生"。</div>
+    </div>
+    <div style="height:14px"></div>
+    <table>
+      <thead><tr><th>技术路线</th><th>代表工具</th><th>特点</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tname">A. CTC 字符对齐器</span></td><td>MMS-300M Aligner(1130+ 语)、NeMo NFA</td><td class="ok">单模型字符级,管线最简,最现代的主流路线</td></tr>
+        <tr><td><span class="tname">B. CTC 音素对齐 + G2P</span></td><td>WhisperX(wav2vec2 phoneme)</td><td>音素边界更准;需按语言准备 G2P 词典</td></tr>
+        <tr><td><span class="tname">C. 交叉注意力 DTW</span></td><td>whisper-timestamped、stable-ts、HF word_timestamps</td><td class="warn">只对 Whisper 家族有效,换模型即失效</td></tr>
+        <tr><td><span class="tname">D. 经典 GMM-HMM</span></td><td>Montreal Forced Aligner、Gentle</td><td>CPU 确定性强;Kaldi 依赖较重</td></tr>
+        <tr><td><span class="tname">E. 纯算法库</span></td><td>ctc-segmentation、torchaudio.forced_align</td><td>非模型而是算法本体,可与任意 CTC 模型组合</td></tr>
+      </tbody>
+    </table>
+    <div style="height:14px"></div>
+    <table>
+      <thead><tr><th>工具</th><th>精度与能力</th><th>语言</th><th>速度 / 规模</th><th>适用场景</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tname">Qwen3-ForcedAligner-0.6B</span></td><td class="ok">AAS 评测超三大对齐器;字/词/句任意粒度;≤5 分钟长音频</td><td class="m">11 语言</td><td>NAR 单次 prefill,高效</td><td>LLM-NAR 新范式;Apache 2.0</td></tr>
+        <tr><td><span class="tname">MFA 3.0</span></td><td class="ok">平均边界误差 &lt;15ms;跨语言音素重映射可扩展低资源语</td><td class="m">需词典(英/日/韩内置)</td><td>CPU 即可</td><td>语音学金标准</td></tr>
+        <tr><td><span class="tname">WhisperX</span></td><td class="ok">字级+逐词置信度;Ego4D 转写挑战赛冠军</td><td class="m">35+ 语言</td><td>70× 实时</td><td>识别+对齐+分离一站式</td></tr>
+        <tr><td><span class="tname">MMS-300M Forced Aligner</span></td><td class="ok">单模型字符级;ONNX 可导出</td><td class="m">1130+ 语言</td><td>轻量</td><td>小语种打轴首选</td></tr>
+        <tr><td><span class="tname">NeMo NFA</span></td><td>Conformer-CTC 多语言检查点</td><td class="m">约 25–30 语</td><td>GPU 快</td><td>NeMo 技术栈内</td></tr>
+        <tr><td><span class="tname">Aeneas</span></td><td>MFCC + DTW,语言无关、无需词典</td><td class="m">任意</td><td class="warn">约 1× 实时</td><td>老牌稳定方案</td></tr>
+      </tbody>
+    </table>
+    <div class="note">生产建议:识别与对齐解耦——任意 ASR 后接统一对齐器;Whisper 系可用 C 路线内建时间戳,Granite/Qwen 等无原生词级时间戳的模型接 A/B 路线对齐器,避免"线性插值假时间戳"在长句尾部累积秒级误差。</div>
+    <div class="srcs">来源:<a href="https://github.com/QwenLM/Qwen3-ForcedAligner" target="_blank" rel="noopener">Qwen3-ForcedAligner</a> · <a href="https://montreal-forced-aligner.readthedocs.io/" target="_blank" rel="noopener">MFA 3.0 官方文档</a> · <a href="https://arxiv.org/abs/2303.00747" target="_blank" rel="noopener">WhisperX 论文</a> · <a href="https://arxiv.org/abs/2305.13516" target="_blank" rel="noopener">MMS 论文(1130+ 语)</a> · <a href="https://arxiv.org/abs/2606.18466" target="_blank" rel="noopener">MFA 2026 对齐综述</a> · <a href="https://github.com/NVIDIA/NeMo" target="_blank" rel="noopener">NeMo NFA</a> · <a href="https://github.com/readbeyond/aeneas" target="_blank" rel="noopener">Aeneas</a></div>
+  </div>
+
+  <!-- 商用 API -->
+  <div class="panel" data-panel="api">
+    <table>
+      <thead><tr><th>API / 服务</th><th>厂商</th><th>核心特长</th><th>字幕场景适配</th><th>成本</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tname">GPT-4o Transcribe</span></td><td>OpenAI</td><td>语义级纠错、可注入上下文提示词纠正术语</td><td>错字校对、术语热词、标点断句</td><td class="m">$$$</td></tr>
+        <tr><td><span class="tname">Gemini 2.5 Flash / Pro</span></td><td>Google</td><td>音视频多模态直接输入,超长上下文</td><td>带画面的视频字幕、内容摘要</td><td class="m">$$</td></tr>
+        <tr><td><span class="tname">Deepgram Nova-3 / Flux</span></td><td>Deepgram</td><td>流式低延迟、diarization、智能断句(Paragraphs/Utterances)</td><td>直播实时字幕、会议</td><td class="m">$</td></tr>
+        <tr><td><span class="tname">AssemblyAI Universal-3</span></td><td>AssemblyAI</td><td>说话人标签、章节、摘要、PII 脱敏</td><td>访谈/播客字幕+结构化</td><td class="m">$</td></tr>
+        <tr><td><span class="tname">Scribe v2</span></td><td>ElevenLabs</td><td>32 语种,多语种 WER 5.83%,字符级时间戳</td><td>欧洲小语种字幕</td><td class="m">$$</td></tr>
+        <tr><td><span class="tname">Chirp 3</span></td><td>Google Cloud</td><td>100+ 语言广覆盖,与 STT/翻译 API 打通</td><td>多语种批量转写</td><td class="m">$$</td></tr>
+        <tr><td><span class="tname">Azure Custom Speech</span></td><td>Microsoft</td><td>自定义训练+热词,合规友好(国内区域)</td><td>行业术语字幕、企业合规</td><td class="m">$$</td></tr>
+        <tr><td><span class="tname">讯飞 / 火山 / 阿里云 / 腾讯云</span></td><td>国内厂商</td><td>中文方言覆盖全、热词、按时长计费成熟</td><td>国内视频/直播字幕首选</td><td class="m">$</td></tr>
+      </tbody>
+    </table>
+    <div class="note">选择建议:隐私敏感→本地开源模型;长视频批量→云 API 按时长计费;直播→流式低延迟(Deepgram/Qwen3-ASR-0.6B);术语密集→支持热词或上下文偏置的服务。</div>
+    <div class="srcs">来源:<a href="https://platform.openai.com/docs/guides/speech-to-text" target="_blank" rel="noopener">OpenAI STT 文档</a> · <a href="https://ai.google.dev/gemini-api/docs/video-understanding" target="_blank" rel="noopener">Gemini 视频理解</a> · <a href="https://developers.deepgram.com/docs/nova-3" target="_blank" rel="noopener">Deepgram Nova-3</a> · <a href="https://www.assemblyai.com/docs/speech-to-text" target="_blank" rel="noopener">AssemblyAI</a> · <a href="https://elevenlabs.io/speech-to-text" target="_blank" rel="noopener">ElevenLabs Scribe</a> · <a href="https://cloud.google.com/speech-to-text" target="_blank" rel="noopener">Google Chirp 3</a> · <a href="https://learn.microsoft.com/azure/ai-services/speech-service/" target="_blank" rel="noopener">Azure Speech</a> · <a href="https://www.xfyun.cn/services/lfasr" target="_blank" rel="noopener">讯飞转写</a> · <a href="https://www.volcengine.com/product/speech-to-text" target="_blank" rel="noopener">火山引擎</a></div>
+  </div>
+</section>
+
+<!-- ================= 03 开源项目 ================= -->
+<section id="oss" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 04 · OPEN SOURCE</div>
+    <h2>高星开源项目</h2>
+    <p>字幕与翻译方向最活跃的开源项目,按"模型基座 / 视频字幕管线 / 翻译与双语工具 / 字幕工程"分类。★ 为 2026-08 约值,请以 GitHub 实时数据为准。</p>
+  </div>
+
+  <div class="toolbar">
+    <div class="filters" id="repoFilters">
+      <div class="fbtn on" data-cat="all">全部</div>
+      <div class="fbtn" data-cat="asr">模型基座</div>
+      <div class="fbtn" data-cat="pipe">视频字幕管线</div>
+      <div class="fbtn" data-cat="trans">翻译与双语</div>
+      <div class="fbtn" data-cat="edit">字幕工程</div>
+    </div>
+    <div class="search">🔍 <input type="text" id="repoSearch" placeholder="搜索项目名 / 描述…"></div>
+  </div>
+
+  <div class="repo-grid" id="repoGrid">
+
+    <div class="repo" data-cat="asr" data-k="whisper openai 语音识别 99语言 生态">
+      <div class="repo-top"><h3>openai/whisper<small>ASR 生态基石</small></h3><span class="stars">★ 80k</span></div>
+      <p>99+ 语言转写/翻译/时间戳一体,MIT 协议。几乎所有字幕管线的默认起点,衍生生态最丰富。</p>
+      <div class="repo-tags"><span class="rtag">99 语言</span><span class="rtag">MIT</span><span class="rtag">时间戳</span></div>
+      <a class="repo-link" href="https://github.com/openai/whisper" target="_blank" rel="noopener">github.com/openai/whisper ↗</a>
+    </div>
+
+    <div class="repo" data-cat="asr" data-k="whisper.cpp 本地部署 cpu metal 边缘">
+      <div class="repo-top"><h3>whisper.cpp<small>C/C++ 本地推理</small></h3><span class="stars">★ 41k</span></div>
+      <p>CPU / Metal / Vulkan / WASM 全平台,无 GPU 也能跑,隐私场景与边缘设备部署的事实标准。</p>
+      <div class="repo-tags"><span class="rtag">无 GPU 可用</span><span class="rtag">本地/离线</span><span class="rtag">量化</span></div>
+      <a class="repo-link" href="https://github.com/ggml-org/whisper.cpp" target="_blank" rel="noopener">github.com/ggml-org/whisper.cpp ↗</a>
+    </div>
+
+    <div class="repo" data-cat="asr" data-k="faster-whisper ctranslate2 加速">
+      <div class="repo-top"><h3>faster-whisper<small>CTranslate2 加速版</small></h3><span class="stars">★ 17k</span></div>
+      <p>同样的模型 4 倍速、显存减半,支持 INT8 量化。pyvideotrans 等工具的默认识别后端。</p>
+      <div class="repo-tags"><span class="rtag">4× 提速</span><span class="rtag">INT8</span><span class="rtag">批处理</span></div>
+      <a class="repo-link" href="https://github.com/SYSTRAN/faster-whisper" target="_blank" rel="noopener">github.com/SYSTRAN/faster-whisper ↗</a>
+    </div>
+
+    <div class="repo" data-cat="asr" data-k="whisperx 对齐 说话人分离 字级时间戳">
+      <div class="repo-top"><h3>WhisperX<small>字级对齐 + 说话人</small></h3><span class="stars">★ 16k</span></div>
+      <p>wav2vec2 强制对齐给出<strong>字级时间戳</strong>,集成 pyannote 说话人分离——高质量字幕的时间轴刚需。</p>
+      <div class="repo-tags"><span class="rtag">字级时间戳</span><span class="rtag">diarization</span></div>
+      <a class="repo-link" href="https://github.com/m-bain/whisperX" target="_blank" rel="noopener">github.com/m-bain/whisperX ↗</a>
+    </div>
+
+    <div class="repo" data-cat="pipe" data-k="videolingo netflix 字幕 切句 对齐 配音">
+      <div class="repo-top"><h3>VideoLingo<small>Netflix 级字幕管线</small></h3><span class="stars">★ 18.2k</span></div>
+      <p>"剪句→翻译→对齐→配音"一键全自动,NLP 断句遵守字幕规范,双语字幕输出,倍受视频搬运/译制组欢迎。</p>
+      <div class="repo-tags"><span class="rtag">一键管线</span><span class="rtag">双语字幕</span><span class="rtag">配音</span></div>
+      <a class="repo-link" href="https://github.com/Huanshere/VideoLingo" target="_blank" rel="noopener">github.com/Huanshere/VideoLingo ↗</a>
+    </div>
+
+    <div class="repo" data-cat="pipe" data-k="pyvideotrans 视频翻译配音 gui 剪映">
+      <div class="repo-top"><h3>pyvideotrans<small>全能视频翻译配音</small></h3><span class="stars">★ 13k</span></div>
+      <p>桌面 GUI,聚合 faster-whisper / FunASR / Gemini 等识别渠道 + 多翻译渠道 + 多 TTS 配音,面向非程序员创作者。</p>
+      <div class="repo-tags"><span class="rtag">GUI</span><span class="rtag">多后端</span><span class="rtag">配音</span></div>
+      <a class="repo-link" href="https://github.com/jianchang512/pyvideotrans" target="_blank" rel="noopener">github.com/jianchang512/pyvideotrans ↗</a>
+    </div>
+
+    <div class="repo" data-cat="pipe" data-k="youdub 视频本地化 声音克隆 bilibili youtube">
+      <div class="repo-top"><h3>YouDub-webui<small>视频本地化+克隆配音</small></h3><span class="stars">★ 5.4k</span></div>
+      <p>YouTube/B站视频下载→字幕识别翻译→语音克隆配音→音轨混合渲染,一站式"视频搬运"方案。</p>
+      <div class="repo-tags"><span class="rtag">声音克隆</span><span class="rtag">人声分离</span></div>
+      <a class="repo-link" href="https://github.com/liuzhao1225/YouDub-webui" target="_blank" rel="noopener">github.com/liuzhao1225/YouDub-webui ↗</a>
+    </div>
+
+    <div class="repo" data-cat="pipe" data-k="aavt chenyme 全自动 视频翻译 whisper gpt">
+      <div class="repo-top"><h3>Chenyme-AAVT<small>全自动视频翻译</small></h3><span class="stars">★ 3.1k</span></div>
+      <p>Whisper 识别 + 大模型翻译 + 字幕合并压制,轻量易改,适合二次开发学习整条链路。</p>
+      <div class="repo-tags"><span class="rtag">轻量</span><span class="rtag">易二开</span></div>
+      <a class="repo-link" href="https://github.com/chenyme/Chenyme-AAVT" target="_blank" rel="noopener">github.com/chenyme/Chenyme-AAVT ↗</a>
+    </div>
+
+    <div class="repo" data-cat="pipe" data-k="openlrc lrc 歌词 字幕 gpt claude">
+      <div class="repo-top"><h3>openlrc<small>音频→LRC/字幕</small></h3><span class="stars">★ 673</span></div>
+      <p>用 Whisper + LLM(GPT/Claude)转录翻译音频为 LRC/字幕文件,歌词场景的精细打磨代表。</p>
+      <div class="repo-tags"><span class="rtag">歌词</span><span class="rtag">LLM 翻译</span></div>
+      <a class="repo-link" href="https://github.com/zh-plus/openlrc" target="_blank" rel="noopener">github.com/zh-plus/openlrc ↗</a>
+    </div>
+
+    <div class="repo" data-cat="trans" data-k="immersive translate 沉浸式翻译 双语 视频 网页">
+      <div class="repo-top"><h3>沉浸式翻译<small>Immersive Translate</small></h3><span class="stars">★ 10k+</span></div>
+      <p>网页/PDF/视频双语显示的浏览器扩展,支持多翻译引擎与 LLM,视频双语字幕是其招牌能力。</p>
+      <div class="repo-tags"><span class="rtag">双语字幕</span><span class="rtag">浏览器扩展</span><span class="rtag">多引擎</span></div>
+      <a class="repo-link" href="https://github.com/immersive-translate/immersive-translate" target="_blank" rel="noopener">github.com/immersive-translate ↗</a>
+    </div>
+
+    <div class="repo" data-cat="trans" data-k="pot desktop 翻译 ocr 划词">
+      <div class="repo-top"><h3>pot-desktop<small>划词翻译/OCR</small></h3><span class="stars">★ 11k</span></div>
+      <p>跨平台划词翻译+截图 OCR,可接各类 LLM,字幕组查术语、校对时的桌面常备工具。</p>
+      <div class="repo-tags"><span class="rtag">划词</span><span class="rtag">OCR</span><span class="rtag">多插件</span></div>
+      <a class="repo-link" href="https://github.com/pot-app/pot-desktop" target="_blank" rel="noopener">github.com/pot-app/pot-desktop ↗</a>
+    </div>
+
+    <div class="repo" data-cat="trans" data-k="luna translator 游戏 翻译 hook ocr">
+      <div class="repo-top"><h3>LunaTranslator<small>游戏/文本翻译</small></h3><span class="stars">★ 5k+</span></div>
+      <p>游戏文本 Hook + OCR + TTS 一体,本地化与游戏字幕翻译领域的活跃项目。</p>
+      <div class="repo-tags"><span class="rtag">游戏本地化</span><span class="rtag">OCR</span></div>
+      <a class="repo-link" href="https://github.com/HIllya51/LunaTranslator" target="_blank" rel="noopener">github.com/HIllya51/LunaTranslator ↗</a>
+    </div>
+
+    <div class="repo" data-cat="edit" data-k="subtitle edit 字幕编辑 whisper 内置">
+      <div class="repo-top"><h3>Subtitle Edit<small>老牌字幕编辑器</small></h3><span class="stars">★ 11k+</span></div>
+      <p>支持 200+ 字幕格式,内置 Whisper 等多种识别引擎,波形图时间轴编辑是审校阶段的主力工具。</p>
+      <div class="repo-tags"><span class="rtag">200+ 格式</span><span class="rtag">内置 ASR</span><span class="rtag">波形编辑</span></div>
+      <a class="repo-link" href="https://github.com/SubtitleEdit/subtitleedit" target="_blank" rel="noopener">github.com/SubtitleEdit/subtitleedit ↗</a>
+    </div>
+
+    <div class="repo" data-cat="edit" data-k="subaligner 对齐 同步 字幕 dnn">
+      <div class="repo-top"><h3>subaligner<small>字幕对齐/同步</small></h3><span class="stars">★ 509</span></div>
+      <p>DNN + 强制对齐自动同步与翻译字幕,支持 20+ 字幕格式互转,解决"字幕时间轴对不上"的老大难。</p>
+      <div class="repo-tags"><span class="rtag">强制对齐</span><span class="rtag">格式转换</span></div>
+      <a class="repo-link" href="https://github.com/baxtree/subaligner" target="_blank" rel="noopener">github.com/baxtree/subaligner ↗</a>
+    </div>
+
+    <div class="repo" data-cat="edit" data-k="ccextractor 隐藏字幕 提取 cc">
+      <div class="repo-top"><h3>CCExtractor<small>CC 隐藏字幕提取</small></h3><span class="stars">★ 2k+</span></div>
+      <p>从录制视频/流中提取闭合字幕(CC)转为 SRT,直播回放与电视节目字幕的抢救利器。</p>
+      <div class="repo-tags"><span class="rtag">CC/608/708</span><span class="rtag">流媒体</span></div>
+      <a class="repo-link" href="https://github.com/CCExtractor/ccextractor" target="_blank" rel="noopener">github.com/CCExtractor/ccextractor ↗</a>
+    </div>
+
+    <div class="repo" data-cat="asr" data-k="funasr 阿里 paraformer sensevoice 工具包">
+      <div class="repo-top"><h3>FunASR<small>阿里语音工具包</small></h3><span class="stars">★ 10k+</span></div>
+      <p>Paraformer / SenseVoice 等模型的官方工具箱,含 VAD、标点、说话人、时间戳全链路组件。</p>
+      <div class="repo-tags"><span class="rtag">全链路</span><span class="rtag">工业级</span></div>
+      <a class="repo-link" href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener">github.com/modelscope/FunASR ↗</a>
+    </div>
+
+    <div class="repo" data-cat="asr" data-k="sensevoice 情感 事件 中文">
+      <div class="repo-top"><h3>SenseVoice<small>多功能中文 ASR</small></h3><span class="stars">★ 11k+</span></div>
+      <p>识别+情感+音频事件(笑声/掌声)一体,速度远超 Whisper-small,中文字幕加"情绪标记"的好选择。</p>
+      <div class="repo-tags"><span class="rtag">情感识别</span><span class="rtag">极快</span></div>
+      <a class="repo-link" href="https://github.com/FunAudioLLM/SenseVoice" target="_blank" rel="noopener">github.com/FunAudioLLM/SenseVoice ↗</a>
+    </div>
+
+    <div class="repo" data-cat="asr" data-k="fireredasr 中文 cer 热词">
+      <div class="repo-top"><h3>FireRedASR<small>中文精度标杆</small></h3><span class="stars">★ 4k+</span></div>
+      <p>CER 0.57% 的开源中文 SOTA,支持热词定制,中文影视/课程字幕的精度首选。</p>
+      <div class="repo-tags"><span class="rtag">CER 0.57%</span><span class="rtag">热词</span></div>
+      <a class="repo-link" href="https://github.com/FireRedTeam/FireRedASR" target="_blank" rel="noopener">github.com/FireRedTeam/FireRedASR ↗</a>
+    </div>
+
+    <div class="repo" data-cat="asr" data-k="sherpa-onnx 部署 跨平台 移动端 流式">
+      <div class="repo-top"><h3>sherpa-onnx<small>跨平台部署框架</small></h3><span class="stars">★ 6k+</span></div>
+      <p>ONNX 运行时把各类 ASR 模型带到 Android/iOS/嵌入式/浏览器,支持流式,移动端字幕的基建。</p>
+      <div class="repo-tags"><span class="rtag">移动端</span><span class="rtag">流式</span><span class="rtag">WASM</span></div>
+      <a class="repo-link" href="https://github.com/k2-fsa/sherpa-onnx" target="_blank" rel="noopener">github.com/k2-fsa/sherpa-onnx ↗</a>
+    </div>
+
+    <div class="repo" data-cat="edit" data-k="buzz 桌面 app 字幕 跨平台">
+      <div class="repo-top"><h3>Buzz<small>桌面字幕 App</small></h3><span class="stars">★ 12k+</span></div>
+      <p>基于 Whisper 的跨平台桌面应用,拖入音视频即出 SRT/VTT,离线可用,个人用户最省心的入口。</p>
+      <div class="repo-tags"><span class="rtag">桌面离线</span><span class="rtag">零门槛</span></div>
+      <a class="repo-link" href="https://github.com/chidiwilliams/Buzz" target="_blank" rel="noopener">github.com/chidiwilliams/Buzz ↗</a>
+    </div>
+
+    <div class="repo" data-cat="edit" data-k="subgen plex emby jellyfin 自动字幕">
+      <div class="repo-top"><h3>subgen<small>媒体库自动字幕</small></h3><span class="stars">★ 1k+</span></div>
+      <p>给 Plex / Emby / Jellyfin 媒体库自动生成字幕(Whisper),追剧党自建影视库的标配插件。</p>
+      <div class="repo-tags"><span class="rtag">Plex/Emby</span><span class="rtag">自动化</span></div>
+      <a class="repo-link" href="https://github.com/McloudIT/subgen" target="_blank" rel="noopener">subgen · media server subtitle ↗</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= 04 应用产品 ================= -->
+<section id="apps" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 05 · PRODUCTS</div>
+    <h2>应用产品看板</h2>
+    <p>成熟的商用 / 消费级产品,按使用场景分组——它们代表了 AI 字幕能力的产品化形态。</p>
+  </div>
+
+  <div class="app-group">
+    <h3>🎬 创作与剪辑 <span class="gtag">面向视频创作者</span></h3>
+    <div class="app-grid">
+      <div class="app"><div class="app-top"><b>剪映 / CapCut</b><span class="plat">桌面/移动</span></div><p>智能字幕识别→翻译→配音→样式模板全链路,中文创作者的默认选择。</p><div class="hl">识别+翻译+样式一体化</div></div>
+      <div class="app"><div class="app-top"><b>必剪</b><span class="plat">桌面/移动</span></div><p>B站官方剪辑器,一键字幕投稿联动,中文识别体验稳定。</p><div class="hl">B 站生态联动</div></div>
+      <div class="app"><div class="app-top"><b>Premiere Pro</b><span class="plat">桌面</span></div><p>语音转文字生成字幕轨道,支持多语言导出与样式预设。</p><div class="hl">专业剪辑工作流内嵌</div></div>
+      <div class="app"><div class="app-top"><b>DaVinci Resolve</b><span class="plat">桌面</span></div><p>内置语音转文字与字幕轨道,配合 Fairlight 音频链路。</p><div class="hl">免费专业级</div></div>
+      <div class="app"><div class="app-top"><b>Descript</b><span class="plat">桌面/Web</span></div><p>转写后"改文本即剪视频",字幕与剪辑同源,还有 AI 配音。</p><div class="hl">文本即视频</div></div>
+      <div class="app"><div class="app-top"><b>YouTube 创作者工具</b><span class="plat">Web</span></div><p>自动 CC 字幕+自动翻译+时间轴编辑器,免费且分发即达。</p><div class="hl">零成本分发</div></div>
+    </div>
+  </div>
+
+  <div class="app-group">
+    <h3>🗣 会议与转写 <span class="gtag">长音频 / 多人</span></h3>
+    <div class="app-grid">
+      <div class="app"><div class="app-top"><b>通义听悟</b><span class="plat">Web/API</span></div><p>音视频转写+章节摘要+双语字幕+发言人区分,国内知识工作主流。</p><div class="hl">转写+纪要一体</div></div>
+      <div class="app"><div class="app-top"><b>飞书妙记</b><span class="plat">Web/移动</span></div><p>会议实时字幕与智能纪要,企业协作场景原生集成。</p><div class="hl">会议原生集成</div></div>
+      <div class="app"><div class="app-top"><b>讯飞听见</b><span class="plat">Web/硬件</span></div><p>转写+翻译+字幕导出,方言口音鲁棒性好。</p><div class="hl">中文方言强</div></div>
+      <div class="app"><div class="app-top"><b>Otter.ai</b><span class="plat">Web/移动</span></div><p>实时会议字幕+摘要+行动项,国际会议场景标杆。</p><div class="hl">实时+协作</div></div>
+      <div class="app"><div class="app-top"><b>Happy Scribe / Sonix</b><span class="plat">Web</span></div><p>多语种转写+字幕编辑器+翻译,媒体团队常用 SaaS。</p><div class="hl">多语种 SaaS</div></div>
+      <div class="app"><div class="app-top"><b>Rev</b><span class="plat">Web</span></div><p>AI 初稿+人工精校混合模式,字幕质量兜底方案。</p><div class="hl">人工兜底</div></div>
+    </div>
+  </div>
+
+  <div class="app-group">
+    <h3>🌐 双语字幕与语言学习 <span class="gtag">观看 / 学习</span></h3>
+    <div class="app-grid">
+      <div class="app"><div class="app-top"><b>沉浸式翻译</b><span class="plat">浏览器扩展</span></div><p>YouTube/Netflix 等视频双语字幕,网页/PDF 全局双语,支持自配 LLM。</p><div class="hl">全场景双语</div></div>
+      <div class="app"><div class="app-top"><b>Trancy</b><span class="plat">浏览器扩展</span></div><p>视频双语字幕+句词级点读+AI 口语练习,学习闭环更完整。</p><div class="hl">看视频即学习</div></div>
+      <div class="app"><div class="app-top"><b>Language Reactor</b><span class="plat">浏览器扩展</span></div><p>Netflix/YouTube 双语字幕+词典+逐句循环,经典学习伴侣。</p><div class="hl">逐句精听</div></div>
+    </div>
+  </div>
+
+  <div class="app-group">
+    <h3>🎞 影视级译制 <span class="gtag">专业字幕组</span></h3>
+    <div class="app-grid">
+      <div class="app"><div class="app-top"><b>Aegisub</b><span class="plat">桌面 · 开源</span></div><p>ASS 特效字幕行业标准,配 AI 初稿后人工精修的黄金搭档。</p><div class="hl">ASS 特效之王</div></div>
+      <div class="app"><div class="app-top"><b>Subtitle Edit</b><span class="plat">桌面 · 开源</span></div><p>200+ 格式互转+波形编辑+内置 Whisper,批处理与 QA 强大。</p><div class="hl">批处理+QA</div></div>
+      <div class="app"><div class="app-top"><b>Netflix Timed Text 规范</b><span class="plat">行业规范</span></div><p>42 字符/行、阅读速度 CPS 等约束是 AI 断句引擎的事实标准。</p><div class="hl">字幕质量金标准</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 案例与平台策略 ================= -->
+<section id="cases" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 06 · CASES</div>
+    <h2>经典案例与平台策略</h2>
+    <p>各领域标志性的字幕 / 本地化案例——从迪士尼到《黑神话:悟空》,从 Netflix 到短剧出海;再看主流平台如何把字幕与配音变成增长策略。每张卡片附可点击来源。</p>
+  </div>
+
+  <div class="case-grid">
+    <div class="case">
+      <div class="case-top"><h3>迪士尼《疯狂动物城》</h3><span class="dom">电影</span></div>
+      <p>2016 年全球发行的本地化范本:新闻主播按地区更换动物(中国熊猫 / 澳新考拉 / 加拿大驼鹿),树懒"闪电"的慢速笑点在各语言版重新调整配音节奏——<b>本地化不止翻译,而是文化再创作</b>。</p>
+      <div class="lesson"><b>启示</b><span>头部内容把字幕 / 配音当"产品线"设计,而非后期工序。</span></div>
+      <div class="srcs">来源:<a href="https://en.wikipedia.org/wiki/Zootopia" target="_blank" rel="noopener">Wikipedia:Zootopia</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>Netflix 美版《甄嬛传》</h3><span class="dom">流媒体剧集</span></div>
+      <p>2015 年 Netflix 引入,76 集重构为 6 集 90 分钟版《Empresses in the Palace》,英文字幕整体重写;"小主""娘娘"等文化专有项采用归化策略,引发<b>直译 vs 意译</b>的持续讨论。</p>
+      <div class="lesson"><b>启示</b><span>长剧集出海常伴随"再剪辑 + 再字幕",字幕是内容重构的一部分。</span></div>
+      <div class="srcs">来源:<a href="https://en.wikipedia.org/wiki/Empresses_in_the_Palace" target="_blank" rel="noopener">Wikipedia:Empresses in the Palace</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>《鱿鱼游戏》字幕争议</h3><span class="dom">流媒体剧集</span></div>
+      <p>Netflix 史上最热剧集(37 种字幕 / 34 种配音),但双语观众公开指出英文字幕丢失韩语敬语与角色潜台词(如"走开"实为"你在看什么"),媒体跟进讨论,<b>倒逼平台加大字幕投入</b>。</p>
+      <div class="lesson"><b>启示</b><span>爆款内容的字幕质量会变成舆情事件;"字幕 ≠ 普通翻译"由此成为公众常识。</span></div>
+      <div class="srcs">来源:<a href="https://language.chinadaily.com.cn/a/202110/15/WS6168c485a310cdd39bc6f0ee.html" target="_blank" rel="noopener">中国日报报道</a> · <a href="https://m.thepaper.cn/newsDetail_forward_14936479" target="_blank" rel="noopener">观察者网分析</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>《黑神话:悟空》本地化</h3><span class="dom">游戏</span></div>
+      <p>中国首款 3A,全球销量约 3000 万份、海外过半。"妖怪 → yaoguai、龙 → Loong"音译立住东方词,"晦月魔君 → Darkveil"等原创词用意译;诗词重韵律节奏,虎先锋东北口音 → Cockney 口音;团队明确<b>未用 AI 翻译</b>。</p>
+      <div class="lesson"><b>启示</b><span>文化 IP 出海"异化为主 + 归化兜底"的术语策略教科书;高复杂度文本仍靠人类译者。</span></div>
+      <div class="srcs">来源:<a href="https://user.guancha.cn/main/content?id=1306835" target="_blank" rel="noopener">本地化团队专访(游研社)</a> · <a href="https://ijels.com/upload_document/issue_files/88IJELS-104202659-Translation.pdf" target="_blank" rel="noopener">翻译策略研究论文</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>《原神》多语运营</h3><span class="dom">游戏</span></div>
+      <p>全球同步运营,提供中 / 英 / 日 / 韩四语配音 + 12 种文本语种(含泰语、越南语、印尼语等小语种字幕);角色名、地名等术语跨语种统一管理,<b>本地化团队贯穿开发流程</b>而非后期外包。</p>
+      <div class="lesson"><b>启示</b><span>长线运营产品把本地化做成"持续服务";小语种字幕从增量市场变成标配。</span></div>
+      <div class="srcs">来源:<a href="https://en.wikipedia.org/wiki/Genshin_Impact" target="_blank" rel="noopener">Wikipedia:Genshin Impact</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>《三体》双语种全球同步</h3><span class="dom">IP 出海</span></div>
+      <p>2024 年 Netflix《3 Body Problem》190+ 国家 / 地区同步上线,走"中文原著 → 英文剧本 → 全球字幕配音"的再出海链路;"面壁者 Wallfacer"等术语的<b>跨媒介术语一致性</b>成为翻译圈讨论焦点。</p>
+      <div class="lesson"><b>启示</b><span>跨媒介 IP 需要统一术语库(Glossary)贯穿字幕、配音与宣发。</span></div>
+      <div class="srcs">来源:<a href="https://en.wikipedia.org/wiki/3_Body_Problem_(TV_series)" target="_blank" rel="noopener">Wikipedia:3 Body Problem</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>MrBeast 多语言矩阵</h3><span class="dom">创作者经济</span></div>
+      <p>主频道订阅 4 亿+,另运营西语 / 葡语 / 法语 / 印地语等 13+ 本地化频道,本地化受众一度反超主频道;随 YouTube 多音轨普及,逐步转向<b>"单一视频 + 多语言音轨"</b>。</p>
+      <div class="lesson"><b>启示</b><span>头部创作者把字幕 + 配音当作增长渠道运营,而非可选项。</span></div>
+      <div class="srcs">来源:<a href="https://en.wikipedia.org/wiki/MrBeast" target="_blank" rel="noopener">Wikipedia:MrBeast</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>YouTube 自动配音</h3><span class="dom">平台基础设施</span></div>
+      <p>2024-12 面向知识类频道开放,2026-02 扩至 <b>27 种语言、全员可用</b>,8 语种支持 Expressive Speech 情感保留并测试 Lip Sync;2025-12 日均 600 万观众观看 10 分钟以上自动配音内容。</p>
+      <div class="lesson"><b>启示</b><span>字幕 / 配音从"创作者成本"变为"平台默认能力",分发逻辑被改写。</span></div>
+      <div class="srcs">来源:<a href="https://blog.youtube/news-and-events/youtube-auto-dubbing-expressive-speech/" target="_blank" rel="noopener">YouTube 官方博客(2026-02)</a> · <a href="https://blog.youtube/news-and-events/auto-dubbing-on-youtube/" target="_blank" rel="noopener">上线公告(2024-12)</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>短剧出海(DramaBox / ReelShort)</h3><span class="dom">微短剧</span></div>
+      <p>AI 短剧出海市场一年内从约 1 亿美元增至 6.5 亿美元(约 6.5 倍);AI 译制把 120 分钟剧集的译制周期从 3 天压缩到 <b>4–5 小时、成本降约 90%</b>;DramaBox、ReelShort、iDrama 等矩阵化发行。</p>
+      <div class="lesson"><b>启示</b><span>"翻译墙"成本坍缩直接催生新品类;字幕 / 配音质量成为留存关键。</span></div>
+      <div class="srcs">来源:<a href="https://news.hubeidaily.net/pc/c_5531325.html" target="_blank" rel="noopener">湖北日报报道</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>李子柒复出</h3><span class="dom">文化出海</span></div>
+      <p>2024-11 停更三年后复出,YouTube 订阅超 2000 万;视频以极少旁白 + 多语 CC 字幕覆盖全球观众,粉丝共建字幕(社区翻译)承担主要翻译工作。</p>
+      <div class="lesson"><b>启示</b><span>"低文本密度内容 + 社区共建字幕"是低预算全球分发的样本。</span></div>
+      <div class="srcs">来源:<a href="https://en.wikipedia.org/wiki/Li_Ziqi" target="_blank" rel="noopener">Wikipedia:Li Ziqi</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>Subscene 关站</h3><span class="dom">字幕社区</span></div>
+      <p>2024-05 全球最大开放字幕库 Subscene 无预警关站,数十语种民间字幕一夜消失;媒体与学界讨论"文化交流与版权的平衡"。国内先行者是 <b>2014 年关闭的射手网</b>(曾为最大中文字幕库)。</p>
+      <div class="lesson"><b>启示</b><span>民间字幕生态持续退潮;合规化 + AI 自制字幕成为主流替代。</span></div>
+      <div class="srcs">来源:<a href="https://news.inewsweek.cn/life/2024-05-28/22144.shtml" target="_blank" rel="noopener">中国新闻周刊</a> · <a href="https://zh.wikipedia.org/wiki/射手网" target="_blank" rel="noopener">Wikipedia:射手网</a></div>
+    </div>
+
+    <div class="case">
+      <div class="case-top"><h3>人人影视判决</h3><span class="dom">法律边界</span></div>
+      <p>2021-11 上海三中院一审宣判:未授权影视 32824 部、会员 683 万、非法经营 1200 余万元,主犯获刑 3 年 6 个月并处罚金 150 万元;2023 年入选最高检指导性案例,"避风港"抗辩被否。</p>
+      <div class="lesson"><b>启示</b><span>"用爱发电"与"营利性复制发行"的法律红线清晰化;字幕组转向版权合作或工具化。</span></div>
+      <div class="srcs">来源:<a href="https://www.spp.gov.cn/zdgz/202310/t20231024_631676.shtml" target="_blank" rel="noopener">最高检指导性案例</a></div>
+    </div>
+  </div>
+
+  <div style="height:26px"></div>
+  <div class="sec-sub-h">平台策略速览</div>
+  <p style="font-size:12.5px;color:var(--dim);margin:8px 0 14px">各平台如何把字幕 / 翻译 / 配音做成策略——三种范式:<b style="color:var(--cyan)">规范驱动</b>(Netflix / Disney+)、<b style="color:var(--violet)">基建驱动</b>(YouTube / TikTok)、<b style="color:var(--green)">成本驱动</b>(短剧 / AI 译制)。</p>
+  <table>
+    <thead><tr><th>平台</th><th>领域</th><th>核心策略</th><th>关键做法与数据</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tname">Netflix</span></td><td>长视频流媒体</td><td><b style="color:var(--cyan)">规范驱动</b> · 本地原创 + 全球分发</td><td>Timed Text Style Guide 严格约束行长 / CPS / 帧率;爆款剧集配 30+ 语种字幕与配音;非英语原创内容全球同步上线。</td></tr>
+      <tr><td><span class="tname">Disney+</span></td><td>长视频流媒体</td><td><b style="color:var(--cyan)">规范驱动</b> · 片库精细本地化</td><td>百年片库系统性补做字幕配音;院线与流媒体版本分级字幕;系列 IP 术语统一。</td></tr>
+      <tr><td><span class="tname">YouTube</span></td><td>UGC 视频</td><td><b style="color:var(--violet)">基建驱动</b> · AI 全托管</td><td>自动 CC(2007 起)+ 自动翻译 + 自动配音(27 语)+ 多音轨;对创作者免费,换取全球分发;日均 600 万观众消费自动配音内容。</td></tr>
+      <tr><td><span class="tname">TikTok</span></td><td>短视频</td><td><b style="color:var(--violet)">基建驱动</b> · 算法分发 + AI 字幕</td><td>视频自动字幕与翻译贴纸;出海创作者依赖内置翻译触达多语市场,字幕覆盖直接影响完播率。</td></tr>
+      <tr><td><span class="tname">B 站</span></td><td>UGC / 中长视频</td><td><b style="color:var(--violet)">基建驱动</b> · 社区共建</td><td>CC 字幕由 UP 主与观众共建;必剪 / 剪映联动 AI 字幕,投稿即带字幕。</td></tr>
+      <tr><td><span class="tname">MrBeast 等头部创作者</span></td><td>创作者经济</td><td><b style="color:var(--violet)">基建驱动</b> · 多语言矩阵</td><td>本地化频道 + 多音轨并行;本地化受众反超主频道,字幕 / 配音直接决定增长天花板。</td></tr>
+      <tr><td><span class="tname">DramaBox / ReelShort</span></td><td>短剧出海</td><td><b style="color:var(--green)">成本驱动</b> · AI 批量译制</td><td>译制成本降约 90%、周期 3 天 → 4–5 小时;多语矩阵化发行,翻译质量成为付费留存变量。</td></tr>
+      <tr><td><span class="tname">Steam / 游戏发行商</span></td><td>游戏</td><td><b style="color:var(--green)">成本驱动</b> · 中文化标配</td><td>2017 年后官方中文成为大作标配;字幕与 UI 同步本地化;小语种字幕逐步下沉。</td></tr>
+      <tr><td><span class="tname">Coursera / 网课平台</span></td><td>教育</td><td><b style="color:var(--green)">成本驱动</b> · 字幕即学习辅助</td><td>多语字幕 + 交互式字幕(点击跳转视频进度);机翻字幕 + 众包校对混合模式。</td></tr>
+    </tbody>
+  </table>
+  <div class="note">策略共性:字幕正从"合规 / 无障碍成本项"变成"增长杠杆"——流媒体靠规范保质量,平台靠 AI 降门槛,出海内容靠批量译制抢速度;而所有路线最终都收敛到"AI 初稿 + 人工审校 + 统一术语库"的混合工作流。</div>
+  <div class="srcs">策略来源:<a href="https://partnerhelp.netflixstudios.com/hc/en-us/articles/217350977-English-USA-Timed-Text-Style-Guide" target="_blank" rel="noopener">Netflix TTSG</a> · <a href="https://blog.youtube/news-and-events/youtube-auto-dubbing-expressive-speech/" target="_blank" rel="noopener">YouTube 自动配音</a> · <a href="https://news.hubeidaily.net/pc/c_5531325.html" target="_blank" rel="noopener">短剧出海(湖北日报)</a> · <a href="https://partner.steamgames.com/doc/store/localization" target="_blank" rel="noopener">Steam 本地化文档</a> · <a href="https://en.wikipedia.org/wiki/Disney%2B" target="_blank" rel="noopener">Disney+</a> · <a href="https://www.bilibili.com" target="_blank" rel="noopener">B 站</a> · <a href="https://www.coursera.org" target="_blank" rel="noopener">Coursera</a></div>
+</section>
+
+<!-- ================= 05 制作流程 ================= -->
+<section id="pipeline" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 07 · PIPELINE</div>
+    <h2>AI 辅助字幕制作 · 主流流程</h2>
+    <p>一条完整的"音频进、成片出"自动化链路。各阶段标注了 AI / 人工参与度——AI 覆盖了前 5 步,后 2 步仍以人为主导。</p>
+  </div>
+
+  <div class="flow-legend" style="margin-bottom:16px">
+    <span><span class="sw" style="background:linear-gradient(90deg,#22d3ee,#818cf8)"></span><b>AI 主导阶段</b>(可全自动)</span>
+    <span><span class="sw" style="background:linear-gradient(90deg,#fbbf24,#f87171)"></span><b>人机协作阶段</b>(需抽检/微调)</span>
+    <span><span class="sw" style="background:rgba(148,163,184,.35)"></span><b>人工主导阶段</b>(质量守门)</span>
+  </div>
+
+  <div class="pipeline">
+    <div class="stage" style="border-top:3px solid #22d3ee">
+      <span class="no">1</span><h4>素材预处理</h4>
+      <p>抽取音轨、降噪、人声分离(BGM 干扰),VAD 剔除静音段防幻觉。</p>
+      <div class="tools"><span>ffmpeg</span><span>Demucs/UVR5</span><span>Silero VAD</span></div>
+      <div class="who"><span class="ai">AI 全自动</span><i>≈ 数秒</i></div>
+    </div>
+    <div class="stage" style="border-top:3px solid #34d3ee">
+      <span class="no">2</span><h4>语音识别</h4>
+      <p>本地或云端 ASR 转写,注入热词表 / 上下文提示纠正专有名词。</p>
+      <div class="tools"><span>Whisper系</span><span>Qwen3-ASR</span><span>FireRedASR</span></div>
+      <div class="who"><span class="ai">AI 全自动</span><i>实时~数分钟</i></div>
+    </div>
+    <div class="stage" style="border-top:3px solid #38bdf8">
+      <span class="no">3</span><h4>对齐 + 分离(打轴)</h4>
+      <p>强制对齐产出字级时间戳,粒度可指定到字/词/句;说话人分离标注"谁在说话"。</p>
+      <div class="tools"><span>WhisperX</span><span>Qwen3-ForcedAligner</span><span>MFA</span><span>pyannote</span></div>
+      <div class="who"><span class="ai">AI 全自动</span><i>与识别同步</i></div>
+    </div>
+    <div class="stage" style="border-top:3px solid #818cf8">
+      <span class="no">4</span><h4>智能断句</h4>
+      <p>按语义 + 字幕规范切句:行长 ≤42 字符、CPS 阅读速度、双行排版。</p>
+      <div class="tools"><span>NLP 切句引擎</span><span>VideoLingo</span><span>规则集</span></div>
+      <div class="who"><span class="ai">AI 主导</span><i>需抽检</i></div>
+    </div>
+    <div class="stage" style="border-top:3px solid #a78bfa">
+      <span class="no">5</span><h4>字幕翻译</h4>
+      <p>LLM 带术语表 + 上下文窗口翻译,输出需满足长度与口语化约束。</p>
+      <div class="tools"><span>GPT/Claude</span><span>DeepSeek</span><span>术语表+记忆库</span></div>
+      <div class="who"><span class="ai">AI 主导</span><i>需抽检</i></div>
+    </div>
+    <div class="stage" style="border-top:3px solid #fbbf24">
+      <span class="no">6</span><h4>审校 QA</h4>
+      <p>波形图微调时间轴、改错字、统一术语;LLM 辅助标记可疑句。</p>
+      <div class="tools"><span>Aegisub</span><span>Subtitle Edit</span><span>QA 规则检查</span></div>
+      <div class="who"><span class="hu">人机协作</span><i>耗时大头</i></div>
+    </div>
+    <div class="stage" style="border-top:3px solid #f87171">
+      <span class="no">7</span><h4>导出压制</h4>
+      <p>导出 SRT/ASS/VTT/TTML;软字幕封装或 ffmpeg+libass 硬压烧录。</p>
+      <div class="tools"><span>ffmpeg</span><span>libass</span><span>样式模板</span></div>
+      <div class="who"><span class="hu">配置驱动</span><i>渲染数分钟</i></div>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:20px">不同形态的产品即这条链路的不同"切片":剪映把 1→7 全打包;VideoLingo / pyvideotrans 覆盖 1→5 加 7;WhisperX 只做 2→3;Aegisub 专注 6;沉浸式翻译则跳过识别、直接翻译平台已有字幕轨道。</div>
+</section>
+
+<!-- ================= 06 字幕规范参考 ================= -->
+<section id="specs" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 08 · STANDARDS</div>
+    <h2>影视字幕规范参考</h2>
+    <p>断句引擎与 QA 规则的"事实法律":流媒体平台规范、中国广电行业标准、广播技术体系(EBU / ATSC / DVB)、影院 DCP 与无障碍 SDH 的核心参数和交付格式。</p>
+  </div>
+
+  <!-- 阅读速度对照图 -->
+  <div class="chart">
+    <div class="chart-title">
+      <h3>阅读速度上限对照(字符/秒 · CPS)</h3>
+      <span>条形长度 = 允许的最大阅读速度(越长越宽松) · 行业公认舒适甜区 15–17 CPS</span>
+    </div>
+    <div class="bar-row"><div class="bar-name">Netflix 成人内容(英语 TTSG)</div><div class="bar-track"><div class="bar-fill top" style="--w:100"></div></div><div class="bar-val"><b>20</b></div></div>
+    <div class="bar-row"><div class="bar-name">Amazon Prime Video</div><div class="bar-track"><div class="bar-fill top" style="--w:100"></div></div><div class="bar-val"><b>20</b></div></div>
+    <div class="bar-row"><div class="bar-name">FCC 美国监管上限</div><div class="bar-track"><div class="bar-fill good" style="--w:90"></div></div><div class="bar-val"><b>18</b></div></div>
+    <div class="bar-row"><div class="bar-name">Netflix 儿童内容</div><div class="bar-track"><div class="bar-fill good" style="--w:85"></div></div><div class="bar-val"><b>17</b></div></div>
+    <div class="bar-row"><div class="bar-name">Netflix 英文模板基准</div><div class="bar-track"><div class="bar-fill mid" style="--w:85"></div></div><div class="bar-val"><b>17</b></div></div>
+    <div class="bar-row"><div class="bar-name">竖屏短视频目标值</div><div class="bar-track"><div class="bar-fill mid" style="--w:75"></div></div><div class="bar-val"><b>13–15</b></div></div>
+    <div class="bar-row"><div class="bar-name">BBC 广播受众(160–180 WPM)</div><div class="bar-track"><div class="bar-fill mid" style="--w:75"></div></div><div class="bar-val"><b>≈15</b></div></div>
+    <div class="bar-row"><div class="bar-name">中日韩语种(全角字符)</div><div class="bar-track"><div class="bar-fill low" style="--w:60"></div></div><div class="bar-val"><b>9–12</b></div></div>
+    <div class="note">CPS = 字幕总字符数 ÷ 显示秒数,如 51 字符显示 3 秒 = 17 CPS。超过 ~20 CPS 大多数观众读不完;低于 12 CPS 字幕显得拖沓。BBC 刻意放慢是因其受众含老年与阅读障碍人群;全角 CJK 字符信息密度更高,9–12 CPS 的体感等效于拉丁语系的 17–20。</div>
+  </div>
+
+  <div style="height:14px"></div>
+
+  <!-- 平台核心参数表 -->
+  <table>
+    <thead><tr><th>规范 / 平台</th><th>每行字符</th><th>最多行数</th><th>阅读速度</th><th>时长与同步规则</th><th>交付格式</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tname">Netflix(英语)</span></td><td class="m">42</td><td class="m">2</td><td class="m">成人 20 / 儿童 17 CPS</td><td class="m">最短 5/6 s · 最长 7 s · 间隔 ≥2 帧 · 与音频偏差 ≤3 帧</td><td class="m">TTML(DFXP/XML)</td></tr>
+      <tr><td><span class="tname">Disney+</span></td><td class="m">42</td><td class="m">2</td><td class="m">最高 20 CPS</td><td class="m">最短 1 s · 最长 7 s</td><td class="m">IMSC / TTML</td></tr>
+      <tr><td><span class="tname">Amazon Prime Video</span></td><td class="m">42</td><td class="m">2</td><td class="m">最高 20 CPS</td><td class="m">最短 1 s · 最长 7 s</td><td class="m">TTML / SCC</td></tr>
+      <tr><td><span class="tname">BBC 广播电视</span></td><td class="m">37–38(按 16:9 宽度 68%)</td><td class="m">2</td><td class="m">160–180 WPM ≈ 15 CPS</td><td class="warn">面向老年/阅读障碍受众,整体偏慢</td><td class="m">EBU-TT / EBU-TT-D</td></tr>
+      <tr><td><span class="tname">FCC(美国监管)</span></td><td class="dim">未硬性规定</td><td class="m">—</td><td class="m">≤18 CPS 且"可读"</td><td class="m">完整 · 准确 · 同步 三原则</td><td class="m">CEA-608 / CTA-708</td></tr>
+      <tr><td><span class="tname">影院(DCP)</span></td><td class="m">40–45</td><td class="m">1–2</td><td class="ok">时长更宽松,随镜头切换</td><td class="m">与画面内容同步</td><td class="m">SMPTE ST 429 XML / Interop</td></tr>
+      <tr><td><span class="tname">竖屏短视频(9:16)</span></td><td class="m">25–38(约横屏 60%)</td><td class="m">1–2</td><td class="m">目标 13–15 CPS</td><td class="m">每条 cue ≥1 s,大字号优先单行</td><td class="m">平台内嵌 / SRT</td></tr>
+    </tbody>
+  </table>
+
+  <div style="height:14px"></div>
+
+  <!-- 语种参数表 -->
+  <table>
+    <thead><tr><th>语言</th><th>横屏每行</th><th>竖屏每行</th><th>阅读速度</th><th>Netflix 交付约定</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tname">拉丁语系(英/西/法等)</span></td><td class="m">42 字符</td><td class="m">25–38</td><td class="m">17–20 CPS</td><td class="m">Arial;白字;字体大小以容纳 42 字符为准</td></tr>
+      <tr><td><span class="tname">中文(简体 / 繁体)</span></td><td class="m">16 全角</td><td class="m">10</td><td class="m">9–12 CPS</td><td class="m">SimHei 黑体;人名用全角间隔号(威廉·莎士比亚);画内文字用中文圆括号</td></tr>
+      <tr><td><span class="tname">日文</span></td><td class="m">13 全角</td><td class="m">8</td><td class="m">9–12 CPS</td><td class="m">汉字·假名混排,笔画复杂故字符数最少</td></tr>
+      <tr><td><span class="tname">韩文</span></td><td class="m">16 全角</td><td class="m">10</td><td class="m">9–12 CPS</td><td class="m">音节块全角宽度</td></tr>
+    </tbody>
+  </table>
+  <div class="note">全角字符宽度约为拉丁字母的两倍,同屏宽度下 CJK 每行容量近乎减半;Netflix 为 30+ 语种单独发布 TTSG,上述为代表性语种参数。竖屏数值约为横屏的 60%,适配短视频平台。</div>
+
+  <div style="height:22px"></div>
+
+  <!-- 中国广电行业标准 -->
+  <div class="sec-sub-h">中国广电行业标准(GY/T)</div>
+  <div class="news-grid" style="margin-top:12px">
+    <div class="news">
+      <span class="tag">GY/T 288—2014</span>
+      <h3>电影送审数字母版字幕技术要求</h3>
+      <p>对白字幕矩形区域高度 = 有效画面垂直高度的 <b>10%</b>,下边界与片头片尾字幕区域下边界重合;2.35:1 / 2.39:1 画幅可将字幕置于有效画面下方的黑边内(宽度 90%);4K 参照 2K 等比缩放;规定片头/对白/片尾/说明性四类字幕的位置与尺寸。<a href="http://www.nrta.gov.cn/module/download/downfile.jsp?classid=0&filename=1603110945139965921.pdf" target="_blank" rel="noopener">广电总局原文 PDF ↗</a></p>
+      <div class="date">国家新闻出版广电总局 · 强制送审依据</div>
+    </div>
+    <div class="news">
+      <span class="tag">GY/T 359—2022</span>
+      <h3>广播电视和网络视听节目对外译制规范</h3>
+      <p>台词字幕颜色宜为白色(容差 90%–100%),<b>4K 超高清 HDR 字幕亮度 ≤300 cd/m²</b>;不宜使用彩色底色;同一画面中台词、说明性、歌词字幕须可区分,两人对白同时出现需区分处理;确立准确性 · 适应性 · 同步性 · 先进性 · 艺术性五项译制原则,并规定翻译 / 配音 / 字幕 / 交付全链路要求。<a href="http://www.nrta.gov.cn/module/download/downfile.jsp?classid=0&filename=42c7749dfcb8406cb7c44fce6d6b8769.pdf&showname=%E5%B9%BF%E6%92%AD%E7%94%B5%E8%A7%86%E5%92%8C%E7%BD%91%E7%BB%9C%E8%A7%86%E5%90%AC%E8%8A%82%E7%9B%AE%E5%AF%B9%E5%A4%96%E8%AF%91%E5%88%B6%E8%A7%84%E8%8C%83.pdf" target="_blank" rel="noopener">广电总局原文 PDF ↗</a></p>
+      <div class="date">2022-10-21 实施 · 出海译制合规依据</div>
+    </div>
+    <div class="news">
+      <span class="tag">行业规范</span>
+      <h3>电视剧母版制作规范(报批稿)</h3>
+      <p>高清与 4K 超高清电视剧母版沿用同一几何规则:对白字幕区域高度为有效画面高度的 10%,下边界与片头片尾字幕区域重合;并给出片头片尾字幕位置图示与画幅比适配细则,是 TV 剧交付平台验收的技术口径。</p>
+      <div class="date">国家广播电视总局 · 母版交付</div>
+    </div>
+  </div>
+
+  <div style="height:22px"></div>
+
+  <!-- 交付格式族谱 -->
+  <div class="sec-sub-h">交付格式族谱</div>
+  <table style="margin-top:12px">
+    <thead><tr><th>格式</th><th>扩展名</th><th>能力</th><th>主战场</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tname">SRT(SubRip)</span></td><td class="m">.srt</td><td>斜体/粗体最小样式,无定位;时间码用逗号毫秒</td><td class="ok">通用基线:本地播放、平台上传、字幕组交换</td></tr>
+      <tr><td><span class="tname">WebVTT</span></td><td class="m">.vtt</td><td>CSS 样式 + cue 定位(线/位/对齐/竖排)、章节标记</td><td class="ok">HTML5 视频、HLS / DASH 流媒体</td></tr>
+      <tr><td><span class="tname">ASS / SSA</span></td><td class="m">.ass / .ssa</td><td>字体/颜色/卡拉 OK/定位/特效脚本</td><td class="ok">动漫、特效字幕、Aegisub 工作流</td></tr>
+      <tr><td><span class="tname">SBV</span></td><td class="m">.sbv</td><td>无样式纯时间轴</td><td class="ok">YouTube 上传专用</td></tr>
+      <tr><td><span class="tname">TTML / DFXP</span></td><td class="m">.ttml / .dfxp / .xml</td><td>W3C XML 全样式布局动画</td><td class="ok">OTT 与广播交换;Netflix 交付格式</td></tr>
+      <tr><td><span class="tname">IMSC 1.3</span></td><td class="m">.xml</td><td>TTML 互操作收紧子集,文本 + 图像双 Profile</td><td class="ok">全球分发 / IMF;<b>2026-02 发布最新版</b></td></tr>
+      <tr><td><span class="tname">EBU-TT / EBU-TT-D</span></td><td class="m">.xml</td><td>XML 广播语义(3350)与分发(3380)</td><td class="ok">欧洲广播链路</td></tr>
+      <tr><td><span class="tname">EBU STL</span></td><td class="m">.stl</td><td>遗留二进制,广播级元数据</td><td class="warn">欧洲广播母版交换(遗留)</td></tr>
+      <tr><td><span class="tname">CEA-608</span></td><td class="m">内嵌</td><td>32×15 等宽网格、CC1–CC4、极低带宽(模拟第 21 行)</td><td class="warn">NTSC 遗产;经"608 over 708"与 HLS 存续</td></tr>
+      <tr><td><span class="tname">CTA-708</span></td><td class="m">内嵌</td><td>Unicode、窗口化显示、最多 63 个服务、丰富样式</td><td class="ok">美国 ATSC 数字电视强制;MPEG-TS / SEI 携带</td></tr>
+      <tr><td><span class="tname">DVB Subtitle / Teletext</span></td><td class="m">内嵌</td><td>图像级或字符级内嵌(ETSI EN 300 743 / 301 775)</td><td class="ok">欧洲数字电视</td></tr>
+      <tr><td><span class="tname">DCP 字幕</span></td><td class="m">.xml</td><td>SMPTE ST 429 / Interop 包</td><td class="ok">影院放映包</td></tr>
+    </tbody>
+  </table>
+
+  <div style="height:22px"></div>
+
+  <!-- 演进三代 -->
+  <div class="sec-sub-h">字幕标准的三代演进</div>
+  <div class="guide-grid" style="margin-top:12px">
+    <div class="guide">
+      <div class="need">1970s–80s · 模拟电视</div>
+      <b>CEA-608 与 Teletext</b>
+      <p>北美把闭链字幕塞进 NTSC 第 21 行(场消隐期),欧洲走 Teletext;固定 32×15 等宽网格、每场 60 波特的极限带宽,定义了"最小可用字幕"。</p>
+    </div>
+    <div class="guide">
+      <div class="need">1990s–2000s · 数字广播</div>
+      <b>CTA-708 与 DVB</b>
+      <p>数字电视带来 Unicode、窗口化定位与图像级 DVB 字幕;EBU-TT 用 XML 重构广播字幕链路,北美 708 向后兼容 608。</p>
+    </div>
+    <div class="guide">
+      <div class="need">2010s+ · 流媒体与全球分发</div>
+      <b>TTML → IMSC → WebVTT</b>
+      <p>W3C TTML(2010)统一交换语义,IMSC 1.3(2026-02)成为互操作金标准;WebVTT 统治浏览器;SRT 仍是民间的"世界语"。</p>
+    </div>
+  </div>
+
+  <div style="height:22px"></div>
+
+  <!-- SDH 符号体系 -->
+  <div class="sec-sub-h">无障碍 SDH / CC 符号体系(Netflix 口径)</div>
+  <table style="margin-top:12px">
+    <thead><tr><th>符号 / 惯例</th><th>用法</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tname m">连字符 -</span></td><td>双说话人各占一行,每行最多一人</td><td class="m">-Are you coming?<br>-In a minute.</td></tr>
+      <tr><td><span class="tname m">方括号 [ ]</span></td><td>音效描述与说话人标签</td><td class="m">[door slams] · [Kimmy] Are you coming?</td></tr>
+      <tr><td><span class="tname m">省略号 …(U+2026)</span></td><td>≥2 秒停顿或话音渐弱;句子被拆分到连续字幕时禁用</td><td class="m">Had I known…</td></tr>
+      <tr><td><span class="tname m">双连字符 --</span></td><td>被动作、音效或他人打断</td><td class="m">-What are you--<br>-Be quiet!</td></tr>
+      <tr><td><span class="tname m">斜体</span></td><td>画外音、电话/电视/电子设备传出的声音、外语词</td><td class="m">-[TV reporter] …(斜体呈现)</td></tr>
+      <tr><td><span class="tname m">音乐符号 ♪</span></td><td>歌词与配乐提示,起止各一个音符</td><td class="m">♪ Smooth jazz plays ♪</td></tr>
+      <tr><td><span class="tname m">全大写 FN</span></td><td>强制叙事(画内文字);时长尽量贴合画面文字;禁与对白合并</td><td class="m">TEXT MESSAGE: MEET ME</td></tr>
+      <tr><td><span class="tname m">中文圆括号()</span></td><td>中文画内文字与说明(区别于英文的 [ ])</td><td class="m">(导演)·(费雯莉饰郝思嘉)</td></tr>
+    </tbody>
+  </table>
+
+  <div style="height:22px"></div>
+
+  <!-- 中文译制惯例 -->
+  <div class="sec-sub-h">中文译制与字幕组实战惯例(民间方法论)</div>
+  <div class="guide-grid" style="margin-top:12px">
+    <div class="guide">
+      <div class="need">去句号化</div>
+      <b>行尾不加句号</b>
+      <p>字幕是流动的,句号阻断视线流;问号/感叹号保留但克制——连续三个感叹号被视为业余。</p>
+    </div>
+    <div class="guide">
+      <div class="need">空格代逗号</div>
+      <b>用空格表示停顿</b>
+      <p>中文常用空格替代逗号表现语气停顿,视觉上更"隐形";断句贴合说话人气口而非纯语法。</p>
+    </div>
+    <div class="guide">
+      <div class="need">单行 15–16 汉字</div>
+      <b>双行为上限</b>
+      <p>人眼扫描速度约 12–15 字/秒;过长会让观众视线在底部停留太久,错过画面信息。</p>
+    </div>
+    <div class="guide">
+      <div class="need">破折号分工</div>
+      <b>— 与 - 各司其职</b>
+      <p><code>—</code> 表语气转折或说明;<code>-</code> 置行首连接双说话人对话,一人一行。</p>
+    </div>
+    <div class="guide">
+      <div class="need">极简与时值填充</div>
+      <b>字幕独有的"伸缩术"</b>
+      <p>信息密集段精简("但是"→"但");拖长音时适度增肥("不"→"不,绝不可能")以匹配画面情绪时长,消除音画剥离感。</p>
+    </div>
+    <div class="guide">
+      <div class="need">注释克制</div>
+      <b>顶端注释(Top Note)少用</b>
+      <p>仅用于决定剧情走向的不可译信息;宁可舍弃彩蛋梗,也别把电影变成阅读理解课。翻译策略按语域分级,在归化与异化间取平衡。</p>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:18px">落地建议:把上述参数编码为断句与 QA 引擎的硬约束——行长按语种区分(拉丁 42 / 中文 16)、CPS 超限触发自动精简或重切、时长边界(5/6–7 s)与帧间隔(≥2 帧)自动校正、SDH 符号规范化;中文商业项目叠加 GY/T 359 的颜色与同屏区分要求做终检。</div>
+</section>
+
+<!-- ================= 07 应用场景 ================= -->
+<section id="scenes" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 09 · USE CASES</div>
+    <h2>应用场景全景</h2>
+    <p>AI 字幕已渗透内容生产、知识工作、学习娱乐与无障碍等几乎所有"有声音"的场景。</p>
+  </div>
+  <div class="scene-grid">
+    <div class="scene"><span class="ico">📹</span><b>自媒体 / 短视频</b><p>一键出字幕+翻译+配音,零成本多语分发。</p><div class="kpi">代表:剪映 / CapCut</div></div>
+    <div class="scene"><span class="ico">🎬</span><b>影视译制</b><p>Netflix 级规范,量大人机协同,术语管理严格。</p><div class="kpi">代表:VideoLingo + Aegisub</div></div>
+    <div class="scene"><span class="ico">🎓</span><b>在线教育</b><p>课程字幕+讲义转写,术语密度高需热词。</p><div class="kpi">代表:通义听悟</div></div>
+    <div class="scene"><span class="ico">📋</span><b>会议 / 访谈</b><p>实时字幕+纪要+发言人区分,多语会议同传。</p><div class="kpi">代表:飞书妙记 / Otter</div></div>
+    <div class="scene"><span class="ico">🔴</span><b>直播实时字幕</b><p>流式 ASR 低延迟,延迟压到 300ms 内。</p><div class="kpi">代表:Qwen3-ASR-0.6B</div></div>
+    <div class="scene"><span class="ico">🎙</span><b>播客转写</b><p>长音频批量转写+章节化+摘要与二次创作。</p><div class="kpi">代表:AssemblyAI</div></div>
+    <div class="scene"><span class="ico">🎮</span><b>游戏本地化</b><p>文本 Hook + OCR 实时翻译,剧情字幕即时化。</p><div class="kpi">代表:LunaTranslator</div></div>
+    <div class="scene"><span class="ico">📖</span><b>语言学习</b><p>双语字幕+点读+逐句精听,看视频即输入。</p><div class="kpi">代表:Trancy / LR</div></div>
+    <div class="scene"><span class="ico">♿</span><b>无障碍</b><p>听障 CC 字幕、SDH 环境音描述,合规刚需。</p><div class="kpi">代表:平台 CC 通道</div></div>
+    <div class="scene"><span class="ico">🌍</span><b>出海传播</b><p>多语字幕+克隆配音,内容跨境再分发。</p><div class="kpi">代表:YouDub / pyvideotrans</div></div>
+  </div>
+</section>
+
+<!-- ================= 08 痛点全景 ================= -->
+<section id="pains" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 10 · PAIN POINTS</div>
+    <h2>痛点全景与对策</h2>
+    <p>AI 字幕"能跑通"和"能上线"之间的距离。按影响程度分级,并给出当前业界的缓解方案。</p>
+  </div>
+  <div class="pain-grid">
+
+    <div class="pain">
+      <div class="pain-top"><h3>⏱ 时间轴漂移,时间戳太粗</h3><span class="sev hi">高</span></div>
+      <p>原生 Whisper 只给 segment 级时间戳,长音频累计漂移,字幕与口型/语音错位,观感直接穿帮。</p>
+      <div class="fix"><b>对策</b><span>字级强制对齐(WhisperX / Qwen3-ForcedAligner);stable-ts 类时间戳稳定化;切窗口短时分段处理。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>👻 静音 / 噪声段幻觉</h3><span class="sev hi">高</span></div>
+      <p>Whisper 在无语音段落会"脑补"出重复或臆造文本,长视频里成串出现,审核极其耗时。</p>
+      <div class="fix"><b>对策</b><span>前置 Silero VAD 过滤静音;压缩重复检测;换用对静音鲁棒的 LLM 化 ASR(Qwen3-ASR 等)。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>📐 断句不符合字幕规范</h3><span class="sev hi">高</span></div>
+      <p>机器切句不看行长/CPS/换行位置,一行 60 字符或半句换屏,阅读体验崩溃;通用 NMT 翻译也不懂"字幕要短"。</p>
+      <div class="fix"><b>对策</b><span>专门断句引擎(VideoLingo 的 NLP 剪句);编码 Netflix 规范为硬约束;翻译时给 LLM 下长度指令+超长重译。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>🧩 术语 / 专有名词识别错</h3><span class="sev hi">高</span></div>
+      <p>人名、产品名、行话、缩写是错字重灾区;GigaSpeechBench 显示垂域(法律/医疗/金融)WER 可达通用场景数倍。</p>
+      <div class="fix"><b>对策</b><span>热词表 / context biasing(FireRedASR、GPT-4o Transcribe 均支持);先抽人名再回填;领域微调。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>🗣 口音 / 方言 / 中英夹杂</h3><span class="sev mid">中</span></div>
+      <p>带口音英语与方言普通话识别率骤降;创作者口语中英混说,单一语言模型容易整段判错语言。</p>
+      <div class="fix"><b>对策</b><span>Qwen3-ASR(22 方言+多语);GigaSpeechBench 类真实场景选型;混说场景做语言路由。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>👥 多说话人重叠</h3><span class="sev mid">中</span></div>
+      <p>访谈/综艺多人抢话时,识别串行、说话人归属混乱,字幕"张冠李戴"。</p>
+      <div class="fix"><b>对策</b><span>pyannote / NeMo Sortformer 端到级分离;重叠段标记人工处理;人声分离模型预拆分。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>✍️ 字幕翻译 ≠ 普通翻译</h3><span class="sev hi">高</span></div>
+      <p>字幕要求短、口语化、保语气、双行排版,还要同步术语;通用 MT 输出书面且超长,直接不可用。</p>
+      <div class="fix"><b>对策</b><span>LLM + 字幕体例 prompt + 长度硬校验;翻译记忆库保持前后一致;字幕风格 few-shot 示例。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>🔁 长内容术语前后不一致</h3><span class="sev mid">中</span></div>
+      <p>两小时视频里同一个名字出现三种译法;逐句独立翻译天然缺乏全局记忆。</p>
+      <div class="fix"><b>对策</b><span>术语表(glossary)前置抽取;滑窗上下文翻译;全片后校验统一替换。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>🔥 算力与耗时成本</h3><span class="sev mid">中</span></div>
+      <p>本地跑 large-v3,2 小时视频 CPU 需数小时;批量创作者 GPU 门槛高,云 API 费用随时长线性上涨。</p>
+      <div class="fix"><b>对策</b><span>faster-whisper(CT2 4×)+ Turbo/量化模型;云端并发;按需分级:初稿用小模型,难段用大模型。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>🧵 工程链路割裂</h3><span class="sev mid">中</span></div>
+      <p>ASR、对齐、断句、翻译、压制来自不同工具,格式互转与报错定位成本高,自己拼管线易碎。</p>
+      <div class="fix"><b>对策</b><span>集成化管线(pyvideotrans / VideoLingo);SRT/ASS 作为中间标准件;容器化+重试队列。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>🔒 隐私与合规</h3><span class="sev mid">中</span></div>
+      <p>未发布内容、内部会议、医疗法律音视频不可上云,但纯本地部署的工程门槛与算力成本又高。</p>
+      <div class="fix"><b>对策</b><span>本地化部署(whisper.cpp / faster-whisper / sherpa-onnx);私有化 ASR 镜像;边缘小模型初稿+本地大模型精修。</span></div>
+    </div>
+
+    <div class="pain">
+      <div class="pain-top"><h3>🧑‍💻 审校仍占大头</h3><span class="sev hi">高</span></div>
+      <p>全链路自动化的今天,人工微调时间轴、改错字、顺句仍占整体工时的一半以上——AI 只是把"从零打字"变成了"改作业"。</p>
+      <div class="fix"><b>对策</b><span>LLM 预检可疑句+置信度排序,人只看 20% 热点;快捷键化字幕编辑器;双语预览边看边改。</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= 09 学术文献 ================= -->
+<section id="papers" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 11 · PAPERS</div>
+    <h2>学术文献速览</h2>
+    <p>ASR 精度、小语种鲁棒性、语音翻译与强制对齐(打轴)方向的代表作——从 2026 年最新成果到仍被广泛引用的经典基线。</p>
+  </div>
+  <div class="news-grid">
+
+    <div class="news">
+      <span class="tag">ASR · 打轴</span>
+      <h3>Qwen3-ASR Technical Report</h3>
+      <p>LALM 范式代表作:52 语种 / 22 方言识别,0.6B 流式 TTFT 92ms;首次提出 LLM-NAR 强制对齐器,官方 AAS 评测超越三大最强对齐器。<a href="https://arxiv.org/abs/2601.21337" target="_blank" rel="noopener">arXiv:2601.21337 ↗</a></p>
+      <div class="date">Qwen Team · 2026-01</div>
+    </div>
+
+    <div class="news">
+      <span class="tag">基准</span>
+      <h3>GigaSpeechBench: A Real-World Multilingual STT Benchmark</h3>
+      <p>680 小时人工标注:12 门中东/东南亚低资源语言、6 种中文方言、12 个垂域,附 11 语人工中英译文支持 AST 评测;揭示垂域/低资源 WER 成倍劣化。<a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">arXiv:2606.28884 ↗</a></p>
+      <div class="date">SpeechColab · 2026-06</div>
+    </div>
+
+    <div class="news">
+      <span class="tag">打轴</span>
+      <h3>Montreal Forced Aligner and the State of Speech-to-Text Alignment in 2026</h3>
+      <p>MFA 3.0 系统综述:四个基准上达 SOTA/近 SOTA,平均边界误差 &lt;15ms;模型自适应与跨语言音素重映射可扩展至训练分布外的语言。<a href="https://arxiv.org/abs/2606.18466" target="_blank" rel="noopener">arXiv:2606.18466 ↗</a></p>
+      <div class="date">MFA Team · 2026-06</div>
+    </div>
+
+    <div class="news">
+      <span class="tag">打轴</span>
+      <h3>Tradition or Innovation: Modern ASR Methods for Forced Alignment</h3>
+      <p>在 TIMIT / Buckeye 人工对齐数据上,经典 GMM-HMM 的 MFA 词对齐仍优于 WhisperX 与 MMS——揭示端到端 ASR 在对齐任务上的短板。<a href="https://arxiv.org/abs/2406.19363" target="_blank" rel="noopener">arXiv:2406.19363 ↗</a></p>
+      <div class="date">Interspeech · 2024</div>
+    </div>
+
+    <div class="news">
+      <span class="tag">小语种</span>
+      <h3>BlasBench: An Open Benchmark for Irish Speech Recognition</h3>
+      <p>爱尔兰语评测:Whisper 全系 WER &gt;100%(插入式幻觉),large-v3-turbo 在 FLEURS 插入率高达 491%;Azure 22.2%,最佳开源 Omnilingual ASR 7B 30.65%。<a href="https://arxiv.org/abs/2604.10736" target="_blank" rel="noopener">arXiv:2604.10736 ↗</a></p>
+      <div class="date">独立研究 · 2026-04</div>
+    </div>
+
+    <div class="news">
+      <span class="tag">小语种</span>
+      <h3>WER We Stand: Benchmarking Urdu ASR Models</h3>
+      <p>Whisper / MMS / SeamlessM4T 三族在乌尔都语上的对照:朗读语音 Seamless-large 最优、会话语音 Whisper-large 最优;强调低资源语需要本地化文本规范化。<a href="https://arxiv.org/abs/2409.11252" target="_blank" rel="noopener">arXiv:2409.11252 ↗</a></p>
+      <div class="date">LUMS · 2024</div>
+    </div>
+
+    <div class="news">
+      <span class="tag">打轴</span>
+      <h3>WhisperX: Time-Accurate Speech Transcription of Long-Form Audio</h3>
+      <p>wav2vec2 CTC 字级强制对齐 + pyannote 说话人分离;Ego4D 转写挑战赛冠军,至今仍是工程界"识别+打轴"的默认起点。<a href="https://arxiv.org/abs/2303.00747" target="_blank" rel="noopener">arXiv:2303.00747 ↗</a></p>
+      <div class="date">Interspeech · 2023</div>
+    </div>
+
+    <div class="news">
+      <span class="tag">语音翻译</span>
+      <h3>From Tower to Spire: Adding the Speech Modality to a Translation-Specialist LLM</h3>
+      <p>仅用 42.5K 小时语音做"离散化语音 = 又一门语言"的继续预训练,即让翻译专精 LLM 获得语音翻译能力并在 CoVoST-2 上超越 SeamlessM4T,文本能力不降。<a href="https://arxiv.org/abs/2503.10620" target="_blank" rel="noopener">arXiv:2503.10620 ↗</a></p>
+      <div class="date">IT / Unbabel · 2025</div>
+    </div>
+
+    <div class="news">
+      <span class="tag">语音翻译</span>
+      <h3>CoT-ST: LLM-based Speech Translation with Multimodal Chain-of-Thought</h3>
+      <p>把语音翻译分解为"先转写、后翻译"的多模态思维链:CoVoST-2 en-zh 45.2→47.7 BLEU,验证 LLM 推理可吸收级联误差传播。<a href="https://arxiv.org/abs/2409.19510" target="_blank" rel="noopener">arXiv:2409.19510 ↗</a></p>
+      <div class="date">HIT / SJTU · 2024</div>
+    </div>
+
+    <div class="news">
+      <span class="tag">语音翻译</span>
+      <h3>Seamless: Multilingual, Expressive &amp; Streaming Speech Translation</h3>
+      <p>约 100 语言 S2ST/S2TT/T2ST/T2TT 一体化基础模型;v2 在 WMT22 达 31.2 BLEU,流式版延迟约 1.8s。注意:权重 CC-BY-NC 4.0 非商用。<a href="https://github.com/facebookresearch/seamless_communication" target="_blank" rel="noopener">facebookresearch/seamless_communication ↗</a></p>
+      <div class="date">Meta FAIR · 2023</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= 10 选型速查 ================= -->
+<section id="guide" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 12 · CHEATSHEET</div>
+    <h2>选型速查</h2>
+    <p>按需求快速锁定技术栈——八种典型诉求的推荐组合。</p>
+  </div>
+  <div class="guide-grid">
+    <div class="guide">
+      <div class="need">中文精度优先</div>
+      <b>FireRedASR-AED + Subtitle Edit</b>
+      <p>中文 CER 0.57% 天花板 + 热词定制,影视/课程级精度首选;<code>FunASR</code> 提供全链路组件。</p>
+    </div>
+    <div class="guide">
+      <div class="need">多语种 / 方言</div>
+      <b>Qwen3-ASR-1.7B</b>
+      <p>52 语种 + 22 方言,附带 <code>Qwen3-ForcedAligner</code> 字级对齐;兜底选 <code>Whisper</code>(99+ 语言)。</p>
+    </div>
+    <div class="guide">
+      <div class="need">英文最高精度</div>
+      <b>Granite Speech 4.1 2B / Canary-Qwen</b>
+      <p>HF Open ASR 榜前二(5.33% / 5.63%);会议电话等真实场景务必用 <code>GigaSpeechBench</code> 口径复测。</p>
+    </div>
+    <div class="guide">
+      <div class="need">本地 / 边缘 / 隐私</div>
+      <b>whisper.cpp + sherpa-onnx</b>
+      <p>无 GPU 可跑、可量化、可进移动端与浏览器;桌面个人用户直接用 <code>Buzz</code> 零门槛出 SRT。</p>
+    </div>
+    <div class="guide">
+      <div class="need">直播实时字幕</div>
+      <b>Qwen3-ASR-0.6B / Deepgram Nova-3</b>
+      <p>流式低延迟(TTFT 92ms);配 <code>Silero VAD</code> 防噪声段误触发,断句用 <code>Paraformer</code> 标点。</p>
+    </div>
+    <div class="guide">
+      <div class="need">Netflix 级字幕产线</div>
+      <b>VideoLingo / pyvideotrans + Aegisub</b>
+      <p>开源一键管线出双语初稿,<code>WhisperX</code> 锁字级时间轴,人工在 <code>Aegisub</code> 精修并过 QA 规则。</p>
+    </div>
+    <div class="guide">
+      <div class="need">小语种 / 多语覆盖</div>
+      <b>Qwen3-ASR / Scribe v2 / MMS</b>
+      <p>精度选 <code>Qwen3-ASR</code>(30 语+22 方言)或 Scribe v2(90+ 语);识字覆盖选 <code>MMS</code>(1100+ 语);商用管线看 CAMB.AI。务必先在目标语真实基准复测。</p>
+    </div>
+    <div class="guide">
+      <div class="need">精准打轴(强制对齐)</div>
+      <b>Qwen3-ForcedAligner / MFA 3.0</b>
+      <p>任意粒度与长音频选 <code>Qwen3-ForcedAligner</code>(LLM-NAR,11 语);语音学级精度选 <code>MFA</code>(&lt;15ms);小语种用 <code>MMS-300M</code> 对齐器(1130+ 语);Whisper 系可内建 <code>WhisperX</code>。</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= 页脚 ================= -->
+<footer>
+  <div class="foot-inner">
+    <div>
+      <h4>关于本看板</h4>
+      <p>围绕「字幕 × 翻译 × AI」主题的静态资讯看板:模型测评、开源项目库、应用产品、经典案例与平台策略、制作流程、应用场景与痛点全景。数据为 2026-08 快照,<b>每两周更新一次</b>;GitHub 星数为约值(以实时为准),评测分数以各官方榜单口径为准。各板块"来源"行与页脚链接均可点击查阅原文。</p>
+    </div>
+    <div>
+      <h4>主要数据来源</h4>
+      <ul>
+        <li>· <a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard" target="_blank" rel="noopener">HuggingFace Open ASR Leaderboard</a></li>
+        <li>· <a href="https://arxiv.org/html/2606.28884v1" target="_blank" rel="noopener">GigaSpeechBench(arXiv:2606.28884)</a></li>
+        <li>· <a href="https://github.com/QwenLM/Qwen3-ASR" target="_blank" rel="noopener">Qwen3-ASR 技术报告(2026-01)</a></li>
+        <li>· <a href="https://github.com/topics/subtitle-translation" target="_blank" rel="noopener">GitHub Topics:subtitle-translation / video-translation</a></li>
+        <li>· <a href="https://doc.pyvideotrans.com/getstart" target="_blank" rel="noopener">pyvideotrans 官方文档</a> 等项目仓库</li>
+        <li>· <a href="https://arxiv.org/abs/2604.10736" target="_blank" rel="noopener">BlasBench 爱尔兰语基准(arXiv:2604.10736)</a></li>
+        <li>· <a href="https://arxiv.org/abs/2606.18466" target="_blank" rel="noopener">MFA 2026 对齐综述(arXiv:2606.18466)</a></li>
+        <li>· <a href="https://arxiv.org/abs/2503.10620" target="_blank" rel="noopener">From Tower to Spire(arXiv:2503.10620)</a></li>
+        <li>· <a href="https://qwen.ai/blog?id=qwen3asr" target="_blank" rel="noopener">Qwen3-ASR &amp; ForcedAligner 官方博客</a></li>
+        <li>· <a href="https://www.astuteanalytica.com/industry-report/ai-dubbing-and-localization-market" target="_blank" rel="noopener">AI 配音与本地化市场报告(Astute Analytica)</a> · <a href="https://www.databridgemarketresearch.com/reports/global-captioning-and-subtitling-solutions-market" target="_blank" rel="noopener">字幕配制解决方案市场(Data Bridge)</a> · <a href="https://pmarketresearch.com/it/ai-subtitle-translator-market/" target="_blank" rel="noopener">AI 字幕翻译器市场</a></li>
+        <li>· <a href="https://elevenlabs.io/blog/series-d" target="_blank" rel="noopener">ElevenLabs Series D 公告</a> · <a href="https://csa-research.com/Blogs-Events/Blog/The-Language-Sector-Slowdown-A-Multifaceted-Outlook" target="_blank" rel="noopener">CSA Research 语言行业报告</a> · <a href="https://news.hubeidaily.net/pc/c_5531325.html" target="_blank" rel="noopener">AI 短剧出海报道(湖北日报)</a></li>
+        <li>· <a href="https://partnerhelp.netflixstudios.com/hc/en-us/articles/217350977-English-USA-Timed-Text-Style-Guide" target="_blank" rel="noopener">Netflix English (USA) TTSG</a> / <a href="https://partnerhelp.netflixstudios.com/hc/en-us/articles/215986007-Chinese-Simplified-Timed-Text-Style-Guide" target="_blank" rel="noopener">Chinese (Simplified) TTSG</a></li>
+        <li>· <a href="https://www.bbc.co.uk/accessibility/forproducts/guides/subtitles/" target="_blank" rel="noopener">BBC Subtitle Guidelines</a> · <a href="https://www.w3.org/TR/ttml-imsc1.3/" target="_blank" rel="noopener">W3C IMSC 1.3</a> · <a href="https://www.w3.org/AudioVideo/TT/docs/TTML-Profiles.html" target="_blank" rel="noopener">TTML 格式族谱</a></li>
+        <li>· <a href="http://www.nrta.gov.cn/module/download/downfile.jsp?classid=0&filename=1603110945139965921.pdf" target="_blank" rel="noopener">GY/T 288—2014 电影字幕技术要求</a> · <a href="http://www.nrta.gov.cn/module/download/downfile.jsp?classid=0&filename=42c7749dfcb8406cb7c44fce6d6b8769.pdf&showname=%E5%B9%BF%E6%92%AD%E7%94%B5%E8%A7%86%E5%92%8C%E7%BD%91%E7%BB%9C%E8%A7%86%E5%90%AC%E8%8A%82%E7%9B%AE%E5%AF%B9%E5%A4%96%E8%AF%91%E5%88%B6%E8%A7%84%E8%8C%83.pdf" target="_blank" rel="noopener">GY/T 359—2022 对外译制规范</a></li>
+        <li>· 案例部分:<a href="https://blog.youtube/news-and-events/youtube-auto-dubbing-expressive-speech/" target="_blank" rel="noopener">YouTube 自动配音官方博客</a> · <a href="https://www.spp.gov.cn/zdgz/202310/t20231024_631676.shtml" target="_blank" rel="noopener">人人影视案(最高检)</a> · <a href="https://news.inewsweek.cn/life/2024-05-28/22144.shtml" target="_blank" rel="noopener">Subscene 关站(中国新闻周刊)</a> · <a href="https://user.guancha.cn/main/content?id=1306835" target="_blank" rel="noopener">《黑神话》本地化专访</a> · <a href="https://language.chinadaily.com.cn/a/202110/15/WS6168c485a310cdd39bc6f0ee.html" target="_blank" rel="noopener">《鱿鱼游戏》字幕争议</a> · <a href="https://partner.steamgames.com/doc/store/localization" target="_blank" rel="noopener">Steam 本地化文档</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="copyright">
+    <span>SubTrans·Hub — 字幕与翻译 · AI 工具库 & 资讯看板</span>
+    <span>数据截至 2026-08 · 每两周更新 · 仅供选型参考</span>
+  </div>
+</footer>
+
+<script>
+/* ========== 1. 模型测评 Tab 切换 ========== */
+const tabs = document.querySelectorAll('#modelTabs .tab');
+const panels = document.querySelectorAll('.panel');
+tabs.forEach(t => t.addEventListener('click', () => {
+  tabs.forEach(x => x.classList.remove('on'));
+  panels.forEach(p => p.classList.remove('on'));
+  t.classList.add('on');
+  document.querySelector(`.panel[data-panel="${t.dataset.tab}"]`).classList.add('on');
+}));
+
+/* ========== 2. 开源项目:分类筛选 + 文本搜索 ========== */
+const fbtns = document.querySelectorAll('#repoFilters .fbtn');
+const repos = document.querySelectorAll('#repoGrid .repo');
+const searchInput = document.getElementById('repoSearch');
+let curCat = 'all';
+
+function applyFilter() {
+  const kw = (searchInput.value || '').trim().toLowerCase();
+  repos.forEach(r => {
+    const okCat = curCat === 'all' || r.dataset.cat === curCat;
+    const okKw = !kw || (r.textContent + ' ' + (r.dataset.k || '')).toLowerCase().includes(kw);
+    r.classList.toggle('hidden', !(okCat && okKw));
+  });
+}
+fbtns.forEach(b => b.addEventListener('click', () => {
+  fbtns.forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  curCat = b.dataset.cat;
+  applyFilter();
+}));
+searchInput.addEventListener('input', applyFilter);
+
+/* ========== 3. 滚动进场动画 ========== */
+const io = new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.06 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ========== 4. 导航 scrollspy ========== */
+const navLinks = [...document.querySelectorAll('#navLinks a')];
+const secs = navLinks.map(a => document.querySelector(a.getAttribute('href')));
+window.addEventListener('scroll', () => {
+  let idx = -1;
+  secs.forEach((s, i) => { if (s && s.getBoundingClientRect().top < 120) idx = i; });
+  navLinks.forEach((a, i) => a.classList.toggle('active', i === idx));
+}, { passive: true });
+
+/* ========== 5. Hero:波形生成 + 字幕轮播 ========== */
+(function () {
+  const wave = document.getElementById('wave');
+  if (wave) {
+    for (let i = 0; i < 34; i++) {
+      const s = document.createElement('span');
+      s.style.height = (18 + Math.random() * 16) + 'px';
+      s.style.animationDelay = (Math.random() * -1.2) + 's';
+      s.style.animationDuration = (0.8 + Math.random() * 0.8) + 's';
+      wave.appendChild(s);
+    }
+  }
+  const lines = [
+    ['这是由 AI 实时生成的双语字幕', '[00:12.340 → 00:15.860] Realtime bilingual captions generated by AI'],
+    ['每个字的起止时间都能精确对齐', '[00:16.000 → 00:19.520] Word-level timestamps aligned by forced aligner'],
+    ['翻译引擎保持术语与语气一致', '[00:20.100 → 00:23.480] Translation engine keeps glossary and tone consistent'],
+  ];
+  let li = 0;
+  const zh = document.getElementById('subZh'), en = document.getElementById('subEn');
+  setInterval(() => {
+    li = (li + 1) % lines.length;
+    zh.style.opacity = 0; en.style.opacity = 0;
+    setTimeout(() => {
+      zh.textContent = lines[li][0]; en.textContent = lines[li][1];
+      zh.style.transition = en.style.transition = 'opacity .4s';
+      zh.style.opacity = 1; en.style.opacity = 1;
+    }, 380);
+  }, 3600);
+})();
+</script>
+</body>
+</html>
