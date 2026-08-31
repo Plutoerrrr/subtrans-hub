@@ -63,11 +63,14 @@
   .hero .chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
   .stat{
     background:var(--card);border:1px solid var(--border);border-radius:11px;padding:10px 16px;
-    display:flex;flex-direction:column;min-width:112px;
+    display:flex;flex-direction:column;min-width:112px;text-decoration:none;
+    cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease;
   }
+  .stat:hover{transform:translateY(-2px);border-color:rgba(34,211,238,.45);background:rgba(34,211,238,.06)}
   .stat b{font-size:20px;font-family:var(--mono);color:#fff}
   .stat b i{font-style:normal;color:var(--cyan);font-size:13px}
   .stat span{font-size:12px;color:var(--dim);margin-top:1px}
+  .stat:hover span{color:var(--cyan)}
   .hero-meta{margin-top:22px;font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .hero-meta .sep{width:3px;height:3px;border-radius:50%;background:var(--dim)}
 
@@ -429,15 +432,15 @@
     <h1>字幕与翻译<br><span class="grad">AI 工具库 & 资讯看板</span></h1>
     <p class="lead">一站式纵览语音识别与字幕翻译生态:通用与小语种模型精度榜单、语音翻译技术路线、精准打轴(强制对齐)方案、高星开源项目与应用产品、经典案例与平台策略、AI 字幕制作全流程与痛点,并附影视字幕规范参考(平台 / 广电行业 / 广播技术 / 无障碍)、学术文献速览与字幕译制入行的学习路径(课程 / 认证 / 社区 / 接单渠道)。</p>
     <div class="chips">
-      <div class="stat"><b>40<i>+</i></b><span>测评模型</span></div>
-      <div class="stat"><b>20<i>+</i></b><span>高星开源项目</span></div>
-      <div class="stat"><b>20<i>+</i></b><span>应用产品</span></div>
-      <div class="stat"><b>12</b><span>痛点 · 对策</span></div>
-      <div class="stat"><b>10</b><span>学术文献</span></div>
-      <div class="stat"><b>12<i>+</i></b><span>规范 · 标准</span></div>
-      <div class="stat"><b>12</b><span>经典案例</span></div>
-      <div class="stat"><b>19</b><span>学习 · 社区资源</span></div>
-      <div class="stat"><b>$65<i>B</i></b><span>语言服务市场 2026</span></div>
+      <a class="stat" href="#models"><b>40<i>+</i></b><span>测评模型</span></a>
+      <a class="stat" href="#oss"><b>20<i>+</i></b><span>高星开源项目</span></a>
+      <a class="stat" href="#apps"><b>20<i>+</i></b><span>应用产品</span></a>
+      <a class="stat" href="#pains"><b>12</b><span>痛点 · 对策</span></a>
+      <a class="stat" href="#papers"><b>10</b><span>学术文献</span></a>
+      <a class="stat" href="#specs"><b>12<i>+</i></b><span>规范 · 标准</span></a>
+      <a class="stat" href="#cases"><b>12</b><span>经典案例</span></a>
+      <a class="stat" href="#learn"><b>19</b><span>学习 · 社区资源</span></a>
+      <a class="stat" href="#market"><b>$65<i>B</i></b><span>语言服务市场</span></a>
     </div>
     <div class="hero-meta">
       <span>数据源:HuggingFace Open ASR Leaderboard / GigaSpeechBench / Qwen3-ASR 技术报告 / GitHub</span>
