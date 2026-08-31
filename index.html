@@ -104,7 +104,7 @@
 
   /* ========== 通用区块 ========== */
   main{max-width:1200px;margin:0 auto;padding:0 24px 60px}
-  section{padding-top:58px}
+  section{padding-top:58px;scroll-margin-top:76px}
   .sec-head{margin-bottom:24px}
   .sec-num{
     font-family:var(--mono);font-size:11.5px;color:var(--cyan);letter-spacing:.22em;
@@ -180,6 +180,10 @@
   td .tname{color:var(--text);font-weight:600;white-space:nowrap}
   .m{font-family:var(--mono)}
   .ok{color:var(--green)} .warn{color:var(--amber)} .bad{color:var(--red)}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tbl-wrap::-webkit-scrollbar{height:5px}
+  .tbl-wrap::-webkit-scrollbar-thumb{background:rgba(148,163,184,.3);border-radius:99px}
+  .tbl-wrap::-webkit-scrollbar-track{background:transparent}
 
   /* ========== 开源项目 ========== */
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
@@ -344,18 +348,52 @@
     .pain-grid{grid-template-columns:1fr 1fr}
     .case-grid{grid-template-columns:1fr 1fr}
     .guide-grid{grid-template-columns:1fr}
-    .bar-row{grid-template-columns:150px 1fr 52px}
+    .bar-row{grid-template-columns:112px 1fr 48px;gap:8px}
     .search{margin-left:0;width:100%}
     .search input{width:100%}
     .toolbar{flex-direction:column;align-items:stretch}
+    /* 导航改两行:logo 一行 + 链接横滑一行 */
+    .nav-inner{flex-direction:column;align-items:stretch;height:auto;padding:10px 16px;gap:6px}
+    .nav-links{margin-left:0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+    .nav-links a{padding:6px 11px;font-size:12.5px}
+    section{scroll-margin-top:110px}
+    /* 表格在窄屏改为横向滚动,避免列挤压 */
+    .tbl-wrap table{min-width:640px}
+    .hero{padding:44px 16px 32px;gap:30px}
+    main{padding:0 16px 50px}
   }
   @media (max-width:600px){
     .repo-grid,.news-grid,.app-grid,.pain-grid,.case-grid{grid-template-columns:1fr}
     .scene-grid{grid-template-columns:1fr 1fr}
-    .pipeline{grid-template-columns:1fr 1fr}
+    .pipeline{grid-template-columns:1fr 1fr;gap:12px}
+    .stage p{min-height:0}
     .bar-row{grid-template-columns:1fr;gap:4px}
     .bar-name{text-align:left}
     .bar-val{text-align:left}
+    /* 手机排版微调 */
+    .hero{padding:34px 14px 26px}
+    section{padding-top:38px}
+    .kicker{flex-wrap:wrap;font-size:10.5px;letter-spacing:.02em;padding:4px 11px}
+    .hero p.lead{font-size:13.5px}
+    .stat{min-width:0;flex:1 1 30%;padding:8px 12px}
+    .stat b{font-size:16px}
+    .stat span{font-size:11px}
+    .hero-meta{font-size:11px;gap:5px}
+    .sec-head h2{font-size:20px}
+    .sec-head p{font-size:13px}
+    .chart{padding:14px}
+    .chart-title h3{font-size:14px}
+    thead th{padding:9px 11px;font-size:11px}
+    tbody td{padding:9px 11px;font-size:12.3px}
+    .news,.case,.pain,.repo,.guide,.scene{padding:13px 14px}
+    .tabs{gap:6px}
+    .tab{padding:7px 13px;font-size:12.5px}
+    .fbtn{padding:6px 12px;font-size:12px}
+    .flow-legend{gap:12px}
+    .hero .chips{gap:7px}
+    footer{padding:26px 16px 36px}
+    .foot-inner{grid-template-columns:1fr;gap:22px}
+    .copyright{justify-content:center;text-align:center}
   }
 </style>
 </head>
@@ -1797,6 +1835,15 @@
 </footer>
 
 <script>
+/* ========== 0. 表格包裹:窄屏横向滚动 ========== */
+document.querySelectorAll('table').forEach(t => {
+  if (t.parentElement.classList.contains('tbl-wrap')) return;
+  const w = document.createElement('div');
+  w.className = 'tbl-wrap';
+  t.parentNode.insertBefore(w, t);
+  w.appendChild(t);
+});
+
 /* ========== 1. 模型测评 Tab 切换 ========== */
 const tabs = document.querySelectorAll('#modelTabs .tab');
 const panels = document.querySelectorAll('.panel');
