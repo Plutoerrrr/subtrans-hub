@@ -445,6 +445,7 @@
       <a href="#apps">应用产品</a>
       <a href="#cases">案例策略</a>
       <a href="#pipeline">制作流程</a>
+      <a href="#fx">进阶场景</a>
       <a href="#specs">字幕规范</a>
       <a href="#scenes">应用场景</a>
       <a href="#pains">痛点全景</a>
@@ -460,7 +461,7 @@
   <div>
     <span class="kicker"><span class="pulse"></span>AI SUBTITLE × TRANSLATION · 数据截至 2026-09 · 每两周更新</span>
     <h1>字幕与翻译<br><span class="grad">AI 工具库 & 资讯看板</span></h1>
-    <p class="lead">一站式纵览语音识别与字幕翻译生态:通用与小语种模型精度榜单、语音翻译技术路线、精准打轴(强制对齐)方案、高星开源项目与应用产品、经典案例与平台策略、AI 字幕制作全流程与痛点,并附影视字幕规范参考(平台 / 广电行业 / 广播技术 / 无障碍)、学术文献速览与字幕译制入行的学习路径(课程 / 认证 / 社区 / 接单渠道)。</p>
+    <p class="lead">一站式纵览语音识别与字幕翻译生态:通用与小语种模型精度榜单、语音翻译技术路线、精准打轴(强制对齐)方案、高星开源项目与应用产品、经典案例与平台策略、AI 字幕制作全流程与痛点、特效字幕与画面内文字(screenlife)进阶管线,并附影视字幕规范参考(平台 / 广电行业 / 广播技术 / 无障碍)、学术文献速览与字幕译制入行的学习路径(课程 / 认证 / 社区 / 接单渠道)。</p>
     <div class="chips">
       <a class="stat" href="#models"><b>40<i>+</i></b><span>测评模型</span></a>
       <a class="stat" href="#models"><b>4.95<i>%</i></b><span>开源 SOTA WER</span></a>
@@ -1266,10 +1267,100 @@
   <div class="note" style="margin-top:20px">不同形态的产品即这条链路的不同"切片":剪映把 1→7 全打包;VideoLingo / pyvideotrans 覆盖 1→5 加 7;WhisperX 只做 2→3;Aegisub 专注 6;沉浸式翻译则跳过识别、直接翻译平台已有字幕轨道。</div>
 </section>
 
+<!-- ================= 08 进阶场景:特效字幕 × 画面内文字 ================= -->
+<section id="fx" class="reveal">
+  <div class="sec-head">
+    <div class="sec-num">SECTION 08 · ADVANCED</div>
+    <h2>进阶场景:特效字幕 × 画面内文字</h2>
+    <p>对白字幕之外的两块硬骨头:卡拉OK / 动态排版类特效字幕,以及《网络谜踪》式 screenlife 作品中大量的屏幕、纸面与社交软件文字。共同格局是——AI 接管"检测、打轴、擦除、批量模板"等工程活,人保留"设计与审美"判断。</p>
+  </div>
+
+  <div class="sec-sub-h">特效字幕 · 五条技术路线</div>
+  <table>
+    <thead><tr><th>路线</th><th>原理与产出</th><th>成熟度</th><th>代表工具</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tname">卡拉OK逐字特效</span></td><td>强制对齐产出词级/音素级时间戳 → 自动转 ASS <span class="m">\k</span> 标签 → 套 kara-templater 模板批量渲染。原本 1-2 小时的逐字打轴压到分钟级,特效师只设计模板</td><td><span class="ok">★★★★</span> 最成熟</td><td>WhisperX / MFA / Qwen3-ForcedAligner + Aegisub</td></tr>
+      <tr><td><span class="tname">创作者动效字幕</span></td><td>词级时间戳 + 预设动效模板(逐词弹出 / 高亮 / 表情包),面向短视频生态</td><td><span class="ok">★★★★</span> 商业化最好</td><td>Submagic · Captions · 剪映</td></tr>
+      <tr><td><span class="tname">画面文字擦除重排</span></td><td>OCR 检测 → 视频修复模型擦除原文 → 译文回填排版;检测与擦除可用,回填靠人</td><td><span class="warn">★★★</span> 半自动</td><td>PaddleOCR + ProPainter/LaMa · manga-image-translator</td></tr>
+      <tr><td><span class="tname">运动跟踪特效</span></td><td>AI 任意点跟踪输出轨迹 → 转 <span class="m">\move</span> / 逐帧 <span class="m">\pos</span>,替代手工跟踪;轨迹到 ASS 的转换工具链尚缺</td><td><span class="warn">★★★</span> 工具链断</td><td>CoTracker3 · Mocha AE</td></tr>
+      <tr><td><span class="tname">LLM 生成特效代码</span></td><td>自然语言描述 → 直接生成 <span class="m">\t</span> <span class="m">\clip</span> 组合、Aegisub Lua 脚本或 Remotion 代码;幻觉与 libass 渲染怪癖是硬伤</td><td><span class="bad">★★</span> 实验期</td><td>LLM + libass · Remotion</td></tr>
+    </tbody>
+  </table>
+  <p class="note">瓶颈不在算法而在数据:特效 .ass 文件散落在历代字幕组发布里,从未被整理成训练集,"端到端生成好看的特效"短期内不可行。进阶技巧:librosa/madmom 节拍检测 + 对齐结果吸附节拍,可自动生成"逐字随节拍跳动"的音乐类特效。</p>
+
+  <div style="height:26px"></div>
+  <div class="sec-sub-h">画面内文字(On-screen Text)· 行业三档方案</div>
+  <p style="font-size:12.5px;color:var(--dim);margin:8px 0 14px">剧中手机、电脑、纸面、社交软件里的文字,Netflix 规范中对应 <b style="color:var(--cyan)">Forced Narrative(FN,强制叙事字幕)</b>概念——三档方案成本与观感差异巨大。</p>
+  <div class="case-grid">
+    <div class="case">
+      <div class="case-top"><h3>字幕档 · FN 说明字幕</h3><span class="dom">主流</span></div>
+      <p>不动画面,把屏幕内容做成顶部说明字幕(如"[手机屏幕:我们分手吧]")。成本极低,Netflix TTSG 官方即此路线,绝大多数剧集的最优解。</p>
+      <div class="lesson"><b>适用</b><span>零星出现屏幕文字的常规剧集;交付快、无返工风险。</span></div>
+      <div class="srcs">来源:<a href="https://partnerhelp.netflixstudios.com/hc/en-us/articles/215758648" target="_blank" rel="noopener">Netflix TTSG</a></div>
+    </div>
+    <div class="case">
+      <div class="case-top"><h3>画面重构档 · 擦除重做</h3><span class="dom">高端</span></div>
+      <p>AE + Mocha 平面跟踪屏幕 → 擦除原文 → 用目标语言重建 UI(聊天气泡、点赞动效)。每分钟画面数千元起,大厂靠 AE 聊天模板库(微信/iMessage 工程文件换字符串批量出片)提效。</p>
+      <div class="lesson"><b>适用</b><span>高预算影视与品牌内容;社交媒体重度依赖的综艺 / 短剧。</span></div>
+    </div>
+    <div class="case">
+      <div class="case-top"><h3>局部重拍档 · 重做屏幕</h3><span class="dom">顶级</span></div>
+      <p>直接补拍插入镜头:用目标语言重做一遍手机屏幕操作。《网络谜踪》类 screenlife 电影院线发行时的做法,成本最高、观感最好。</p>
+      <div class="lesson"><b>适用</b><span>院线电影 / 旗舰剧集的核心镜头。</span></div>
+    </div>
+  </div>
+
+  <div style="height:26px"></div>
+  <div class="sec-sub-h">双语并置管线 · 不擦原文、同进同出</div>
+  <p style="font-size:12.5px;color:var(--dim);margin:8px 0 14px">第三条路:保留原文,在画面中为译文找到合适的空间与样式,并与原文<b style="color:var(--cyan)">同进同出</b>。它把问题从"视频编辑"(擦除/重绘,未解决)降维成"检测 + 打轴 + 排版 + 字幕生成"(每步都有现成组件),约 80-90% 可自动化——screenlife 译制中耗时最长的工序由此从数天压到数小时。</p>
+  <table>
+    <thead><tr><th>环节</th><th>做法</th><th>成熟度</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tname">1 · 检测识别</span></td><td>PP-OCRv5 逐帧检测;screenlife 的 UI 文字清晰高对比,是 OCR 最理想场景</td><td><span class="ok">★★★★</span></td></tr>
+      <tr><td><span class="tname">2 · 跨帧打轴</span></td><td>检测框跨帧 IoU 跟踪 → 每个文字实例由"首帧出现 / 末帧消失"自动生成 t_in/t_out——"同进同出"天然满足;video-subtitle-extractor 已实现检测 + 时间轴 + 坐标导出</td><td><span class="ok">★★★★</span></td></tr>
+      <tr><td><span class="tname">3 · LLM 翻译</span></td><td>带聊天上下文批量翻;消息串的语篇连贯性恰是 LLM 强项</td><td><span class="ok">★★★★</span></td></tr>
+      <tr><td><span class="tname">4 · 空间样式决策</span></td><td>规则先行:检测源文本框上下空区(像素方差 / 边缘密度),没空间就叠半透明底框;字号取源字高 60-80%,颜色采样源文字</td><td><span class="warn">★★</span> 需人工审美</td></tr>
+      <tr><td><span class="tname">5 · ASS 生成</span></td><td><span class="m">\pos</span> + <span class="m">\an</span> 精确定位、BorderStyle=3 不透明底框、<span class="m">\fad</span> 匹配原文淡入;译文独立 style(如 OS-Text-EN),Aegisub 里可开关、可审校</td><td><span class="ok">★★★★</span></td></tr>
+    </tbody>
+  </table>
+  <p class="note">screenlife 加速技巧:一部剧 90% 的画面文字出现在固定 UI 区域(聊天 feed、评论区、标题栏、通知栏)——按 app 皮肤建"区域模板",每个区域定死译文放置规则,把任意空间搜索变成查表。</p>
+
+  <div style="height:26px"></div>
+  <div class="sec-sub-h">残留人工区与研究前沿</div>
+  <div class="news-grid">
+    <div class="news">
+      <span class="tag warn">人工区</span>
+      <h3>滚动内容(feed 刷动 / 消息连发)</h3>
+      <p>静态框覆盖不了,需 <span class="m">\move</span> 线性插值(起止位置可检测),复杂滚动曲线仍是 AE 手工活。但关键可读时刻多为定格——角色停在某条消息上——这部分最好做也最重要,优先自动化。</p>
+      <div class="date">半自动 · \move 插值可用</div>
+    </div>
+    <div class="news">
+      <span class="tag warn">人工区</span>
+      <h3>满屏气泡的空间冲突</h3>
+      <p>聊天界面无空隙时,译文放哪里是审美判断——放气泡内破坏构图,放边缘可能遮挡关键信息,这是人工审校的保留地,也是规则系统最难攻克的环节。</p>
+      <div class="date">人工主导 · 审美判断</div>
+    </div>
+    <div class="news">
+      <span class="tag hot">前沿</span>
+      <h3>场景文字编辑:图像已通,视频未通</h3>
+      <p>图像级"以原风格把译文画回画面"已可用(AnyText 扩散模型、SRNet、MOSTEL);视频级场景文字编辑仍处论文阶段——逐帧一致性(闪烁、抖动)学术界尚未解决,暂无开源工具。</p>
+      <div class="srcs">来源:<a href="https://github.com/tyxiong23/AnyText" target="_blank" rel="noopener">AnyText</a> · <a href="https://github.com/zyddnys/manga-image-translator" target="_blank" rel="noopener">manga-image-translator</a></div>
+      <div class="date">研究前沿 · 论文阶段</div>
+    </div>
+    <div class="news">
+      <span class="tag">组件库</span>
+      <h3>可自行拼装管线的开源件</h3>
+      <p>检测:PP-OCRv5 / RapidOCR(轻量免装 Paddle 全家桶)· 打轴:video-subtitle-extractor · 擦除:ProPainter / LaMa / E2FGVF · 跟踪:CoTracker3 / Mocha · 图像级端到端参考:manga-image-translator、BallonsTranslator(漫画向,证明擦除 + 回填闭环已通)。</p>
+      <div class="srcs">来源:<a href="https://github.com/YaoFANGUK/video-subtitle-extractor" target="_blank" rel="noopener">video-subtitle-extractor</a> · <a href="https://github.com/RapidAI/RapidOCR" target="_blank" rel="noopener">RapidOCR</a> · <a href="https://github.com/sczhou/ProPainter" target="_blank" rel="noopener">ProPainter</a> · <a href="https://github.com/facebookresearch/co-tracker" target="_blank" rel="noopener">CoTracker</a> · <a href="https://github.com/dmMaze/BallonsTranslator" target="_blank" rel="noopener">BallonsTranslator</a></div>
+      <div class="date">开源 · 可组合</div>
+    </div>
+  </div>
+</section>
+
 <!-- ================= 06 字幕规范参考 ================= -->
 <section id="specs" class="reveal">
   <div class="sec-head">
-    <div class="sec-num">SECTION 08 · STANDARDS</div>
+    <div class="sec-num">SECTION 09 · STANDARDS</div>
     <h2>影视字幕规范参考</h2>
     <p>断句引擎与 QA 规则的"事实法律":流媒体平台规范、中国广电行业标准、广播技术体系(EBU / ATSC / DVB)、影院 DCP 与无障碍 SDH 的核心参数和交付格式。</p>
   </div>
@@ -1451,7 +1542,7 @@
 <!-- ================= 07 应用场景 ================= -->
 <section id="scenes" class="reveal">
   <div class="sec-head">
-    <div class="sec-num">SECTION 09 · USE CASES</div>
+    <div class="sec-num">SECTION 10 · USE CASES</div>
     <h2>应用场景全景</h2>
     <p>AI 字幕已渗透内容生产、知识工作、学习娱乐与无障碍等几乎所有"有声音"的场景。</p>
   </div>
@@ -1472,7 +1563,7 @@
 <!-- ================= 08 痛点全景 ================= -->
 <section id="pains" class="reveal">
   <div class="sec-head">
-    <div class="sec-num">SECTION 10 · PAIN POINTS</div>
+    <div class="sec-num">SECTION 11 · PAIN POINTS</div>
     <h2>痛点全景与对策</h2>
     <p>AI 字幕"能跑通"和"能上线"之间的距离。按影响程度分级,并给出当前业界的缓解方案。</p>
   </div>
@@ -1556,7 +1647,7 @@
 <!-- ================= 09 学术文献 ================= -->
 <section id="papers" class="reveal">
   <div class="sec-head">
-    <div class="sec-num">SECTION 11 · PAPERS</div>
+    <div class="sec-num">SECTION 12 · PAPERS</div>
     <h2>学术文献速览</h2>
     <p>ASR 精度、小语种鲁棒性、语音翻译与强制对齐(打轴)方向的代表作——从 2026 年最新成果到仍被广泛引用的经典基线。</p>
   </div>
@@ -1638,7 +1729,7 @@
 <!-- ================= 12 学习与职业路径 ================= -->
 <section id="learn" class="reveal">
   <div class="sec-head">
-    <div class="sec-num">SECTION 12 · LEARNING</div>
+    <div class="sec-num">SECTION 13 · LEARNING</div>
     <h2>字幕译制学习与职业路径</h2>
     <p>AI 浪潮下想入行、转行或深耕字幕译制的人,应该学什么、去哪练、找谁问、怎么接单——面向职业译者、准转行者与兴趣爱好者。所有链接均可点击直达。</p>
   </div>
@@ -1808,7 +1899,7 @@
 <!-- ================= 13 选型速查 ================= -->
 <section id="guide" class="reveal">
   <div class="sec-head">
-    <div class="sec-num">SECTION 13 · CHEATSHEET</div>
+    <div class="sec-num">SECTION 14 · CHEATSHEET</div>
     <h2>选型速查</h2>
     <p>按需求快速锁定技术栈——八种典型诉求的推荐组合。</p>
   </div>
@@ -1884,6 +1975,7 @@
         <li>· <a href="http://www.nrta.gov.cn/module/download/downfile.jsp?classid=0&filename=1603110945139965921.pdf" target="_blank" rel="noopener">GY/T 288—2014 电影字幕技术要求</a> · <a href="http://www.nrta.gov.cn/module/download/downfile.jsp?classid=0&filename=42c7749dfcb8406cb7c44fce6d6b8769.pdf&showname=%E5%B9%BF%E6%92%AD%E7%94%B5%E8%A7%86%E5%92%8C%E7%BD%91%E7%BB%9C%E8%A7%86%E5%90%AC%E8%8A%82%E7%9B%AE%E5%AF%B9%E5%A4%96%E8%AF%91%E5%88%B6%E8%A7%84%E8%8C%83.pdf" target="_blank" rel="noopener">GY/T 359—2022 对外译制规范</a></li>
         <li>· 案例部分:<a href="https://blog.youtube/news-and-events/youtube-auto-dubbing-expressive-speech/" target="_blank" rel="noopener">YouTube 自动配音官方博客</a> · <a href="https://www.spp.gov.cn/zdgz/202310/t20231024_631676.shtml" target="_blank" rel="noopener">人人影视案(最高检)</a> · <a href="https://news.inewsweek.cn/life/2024-05-28/22144.shtml" target="_blank" rel="noopener">Subscene 关站(中国新闻周刊)</a> · <a href="https://user.guancha.cn/main/content?id=1306835" target="_blank" rel="noopener">《黑神话》本地化专访</a> · <a href="https://language.chinadaily.com.cn/a/202110/15/WS6168c485a310cdd39bc6f0ee.html" target="_blank" rel="noopener">《鱿鱼游戏》字幕争议</a> · <a href="https://partner.steamgames.com/doc/store/localization" target="_blank" rel="noopener">Steam 本地化文档</a></li>
         <li>· 学习路径部分:<a href="https://www.uab.cat/web/estudiar/la-oferta-de-masteres-oficiales/informacion-general/-1096480309770.html?param1=1345695508608" target="_blank" rel="noopener">UAB 视听翻译硕士</a> · <a href="https://courses.leeds.ac.uk/33456/Audiovisual_Translation_and_Localisation_MA" target="_blank" rel="noopener">利兹大学 AVT MA</a> · <a href="https://www.catti.net.cn/" target="_blank" rel="noopener">CATTI 官网</a> · <a href="https://www.ted.com/participate/translate" target="_blank" rel="noopener">TED Translators</a> · <a href="http://gvm.netflixstudios.com/partners.html" target="_blank" rel="noopener">Netflix DTT Partners</a> · <a href="https://www.proz.com/pools/subtitlers" target="_blank" rel="noopener">ProZ 字幕译者池</a> · <a href="https://aegisub.org/zh-cn/docs/latest/editing_subtitles/" target="_blank" rel="noopener">Aegisub 中文文档</a> · <a href="https://www.tac-online.org.cn/" target="_blank" rel="noopener">中国翻译协会</a> · <a href="https://alugha.com/cms/accessible-subtitles-corporate-video/" target="_blank" rel="noopener">EAA 无障碍合规解读</a></li>
+        <li>· 进阶场景部分:<a href="https://github.com/YaoFANGUK/video-subtitle-extractor" target="_blank" rel="noopener">video-subtitle-extractor</a> · <a href="https://github.com/zyddnys/manga-image-translator" target="_blank" rel="noopener">manga-image-translator</a> · <a href="https://github.com/dmMaze/BallonsTranslator" target="_blank" rel="noopener">BallonsTranslator</a> · <a href="https://github.com/RapidAI/RapidOCR" target="_blank" rel="noopener">RapidOCR</a> · <a href="https://github.com/sczhou/ProPainter" target="_blank" rel="noopener">ProPainter</a> · <a href="https://github.com/facebookresearch/co-tracker" target="_blank" rel="noopener">CoTracker</a> · <a href="https://github.com/tyxiong23/AnyText" target="_blank" rel="noopener">AnyText</a> · <a href="https://partnerhelp.netflixstudios.com/hc/en-us/articles/215758648" target="_blank" rel="noopener">Netflix TTSG(FN 条款)</a></li>
       </ul>
     </div>
   </div>
