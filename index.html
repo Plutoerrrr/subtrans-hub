@@ -428,11 +428,12 @@
 <!-- ================= Hero ================= -->
 <header class="hero">
   <div>
-    <span class="kicker"><span class="pulse"></span>AI SUBTITLE × TRANSLATION · 数据截至 2026-08 · 每两周更新</span>
+    <span class="kicker"><span class="pulse"></span>AI SUBTITLE × TRANSLATION · 数据截至 2026-09 · 每两周更新</span>
     <h1>字幕与翻译<br><span class="grad">AI 工具库 & 资讯看板</span></h1>
     <p class="lead">一站式纵览语音识别与字幕翻译生态:通用与小语种模型精度榜单、语音翻译技术路线、精准打轴(强制对齐)方案、高星开源项目与应用产品、经典案例与平台策略、AI 字幕制作全流程与痛点,并附影视字幕规范参考(平台 / 广电行业 / 广播技术 / 无障碍)、学术文献速览与字幕译制入行的学习路径(课程 / 认证 / 社区 / 接单渠道)。</p>
     <div class="chips">
       <a class="stat" href="#models"><b>40<i>+</i></b><span>测评模型</span></a>
+      <a class="stat" href="#models"><b>4.95<i>%</i></b><span>开源 SOTA WER</span></a>
       <a class="stat" href="#oss"><b>20<i>+</i></b><span>高星开源项目</span></a>
       <a class="stat" href="#apps"><b>20<i>+</i></b><span>应用产品</span></a>
       <a class="stat" href="#pains"><b>12</b><span>痛点 · 对策</span></a>
@@ -474,18 +475,32 @@
   </div>
   <div class="news-grid">
     <div class="news">
-      <span class="tag hot">NEW MODEL</span>
-      <h3>Qwen3-ASR 家族发布:52 语种 / 22 方言 + NAR 强制对齐</h3>
-      <p>1.7B 版本为开源 SOTA 级、0.6B 版本 TTFT 低至 92ms(并发 128 时 1 秒转写 2000 秒语音),并附带超越三大主流对齐器的 Qwen3-ForcedAligner,Apache 2.0 开源。</p>
-      <div class="date">2026-01 · Qwen3-ASR 技术报告</div>
-      <div class="srcs">来源:<a href="https://github.com/QwenLM/Qwen3-ASR" target="_blank" rel="noopener">GitHub 仓库</a> · <a href="https://qwen.ai/blog?id=qwen3asr" target="_blank" rel="noopener">Qwen 官方博客</a> · <a href="https://arxiv.org/abs/2601.21337" target="_blank" rel="noopener">技术报告 arXiv:2601.21337</a></div>
+      <span class="tag hot">LEADERBOARD</span>
+      <h3>HF Open ASR 榜 8 月版:Qwen3-ASR-1.7B 开源登顶,印地语入榜</h3>
+      <p>默认口径新增 Voice Arena 印度口音英语与 Appen/Dataocean 私有集(4,888 名说话人、12 项属性标注,WER 可按人群分组);Qwen3-ASR-1.7B 以 4.95% 成为开源第一,商用 Resonant-1(4.77%)领跑全榜。</p>
+      <div class="date">2026-08-28 · HuggingFace</div>
+      <div class="srcs">来源:<a href="https://huggingface.co/blog/open-asr-leaderboard-global-south" target="_blank" rel="noopener">HF Blog</a> · <a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard" target="_blank" rel="noopener">Open ASR Leaderboard</a></div>
     </div>
     <div class="news">
-      <span class="tag">LEADERBOARD</span>
-      <h3>Granite Speech 4.1 2B 登顶 HF Open ASR 榜单</h3>
-      <p>以 5.33% 平均 WER(8 大英文数据集)成为开源第一;开源模型已整体超越多数商用 API,LibriSpeech 类"朗读语音"已饱和,差距拉开在会议/电话/噪声场景。</p>
-      <div class="date">2026-05 · HF Open ASR Leaderboard</div>
-      <div class="srcs">来源:<a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard" target="_blank" rel="noopener">HF Open ASR 榜单</a> · <a href="https://huggingface.co/ibm-granite/granite-speech-4.1-2b" target="_blank" rel="noopener">Granite Speech 4.1 模型卡</a></div>
+      <span class="tag hot">NEW MODEL</span>
+      <h3>ElevenLabs Dubbing v2 上线 API:音频到音频,90+ 语种</h3>
+      <p>直接以原始表演为条件的 audio-to-audio 配音模型,语气/情感/停顿跨语言保留,同步感知翻译开箱即用;官方估计达人工质量 80–90%,覆盖含韩/日在内 90+ 语种——AI 配音进入影视级可用区间。</p>
+      <div class="date">2026-08-06 · ElevenLabs</div>
+      <div class="srcs">来源:<a href="https://elevenlabs.io/blog/dubbing-api" target="_blank" rel="noopener">ElevenLabs Blog</a></div>
+    </div>
+    <div class="news">
+      <span class="tag">NEW MODEL</span>
+      <h3>IBM Granite Speech 5.0 Turbo CTC 470M 发布</h3>
+      <p>0.47B 超小 CTC 模型以 5.55% 闯入开源前 12,逼近 2B 级精度;同门 Granite Speech 4.1 2B 更新至 5.43%。开源英文梯队整体进入 5% 时代,小模型与 LLM 化大模型同场竞技。</p>
+      <div class="date">2026-08-25 · IBM Granite</div>
+      <div class="srcs">来源:<a href="https://huggingface.co/ibm-granite/granite-speech-5.0-470m-turboctc" target="_blank" rel="noopener">模型卡(HuggingFace)</a></div>
+    </div>
+    <div class="news">
+      <span class="tag">MULTILINGUAL</span>
+      <h3>Cohere Transcribe Arabic 登顶阿拉伯语 ASR 榜</h3>
+      <p>WER 25.87,较此前开源榜首 Meta OmniASR-LLM-7B 再降 2.45 个点,领先 Whisper Large v3 约 11 个点——开源多语种竞争从"英文内卷"转向全球南方语言。</p>
+      <div class="date">2026-08-27 · Cohere</div>
+      <div class="srcs">来源:<a href="https://releasebot.io/updates/cohere/cohere" target="_blank" rel="noopener">Releasebot</a></div>
     </div>
     <div class="news">
       <span class="tag">BENCHMARK</span>
@@ -496,10 +511,10 @@
     </div>
     <div class="news">
       <span class="tag">CHINESE</span>
-      <h3>FireRedASR-AED:中文 CER 0.57% 精度标杆</h3>
-      <p>1.1B 参数即实现中文识别精度天花板,但仅支持中文;多语种场景仍需 Qwen3-ASR / Whisper 等兜底,热词定制是其另一大优势。</p>
-      <div class="date">持续更新 · FireRedTeam</div>
-      <div class="srcs">来源:<a href="https://github.com/FireRedTeam/FireRedASR" target="_blank" rel="noopener">GitHub 仓库</a></div>
+      <h3>FireRedASR2S:工业级一体化中文识别系统</h3>
+      <p>ASR + VAD + LID + 标点四合一:普通话 4 集平均 CER 2.89%、19 方言集 11.55%,超越 Doubao-ASR / Qwen3-ASR;AED 版保持 AISHELL-1 CER 0.57% 天花板,配套 VAD F1 97.57%。</p>
+      <div class="date">2026-03 论文 · 持续更新 · FireRedTeam</div>
+      <div class="srcs">来源:<a href="https://github.com/FireRedTeam/FireRedASR2S" target="_blank" rel="noopener">GitHub 仓库</a> · <a href="https://arxiv.org/abs/2603.10420" target="_blank" rel="noopener">arXiv:2603.10420</a></div>
     </div>
     <div class="news">
       <span class="tag">OPEN SOURCE</span>
@@ -550,7 +565,7 @@
     <div class="news">
       <span class="tag hot">SERIES D · $500M</span>
       <h3>ElevenLabs 估值 110 亿美元:语音 AI 全栈化</h3>
-      <p>2026-02 完成 5 亿美元 D 轮(Sequoia 领投,a16z 四倍加注,总融资 7.81 亿)。2025 年末 ARR 3.3 亿美元,2026-06 估达 6 亿;财富 500 强渗透 41%。收入结构:企业语音代理 ~32% / API ~26% / 消费订阅 ~20% / <b>配音与本地化 ~12%</b> / 声音授权 ~10%——配音与字幕翻译已成其第四大收入支柱,目标 2–3 年内 IPO。<a href="https://elevenlabs.io/blog/series-d" target="_blank" rel="noopener">官方公告 ↗</a></p>
+      <p>2026-02 完成 5 亿美元 D 轮(Sequoia 领投,a16z 四倍加注,总融资 7.81 亿)。2025 年末 ARR 3.3 亿美元,2026-06 估达 6 亿;财富 500 强渗透 41%。收入结构:企业语音代理 ~32% / API ~26% / 消费订阅 ~20% / <b>配音与本地化 ~12%</b> / 声音授权 ~10%——配音与字幕翻译已成其第四大收入支柱,目标 2–3 年内 IPO。2026-08 又上线 <a href="https://elevenlabs.io/blog/dubbing-api" target="_blank" rel="noopener">Dubbing v2 音到音配音 API</a>(90+ 语种,官方估计人工质量 80–90%),持续加码本地化品类。<a href="https://elevenlabs.io/blog/series-d" target="_blank" rel="noopener">官方公告 ↗</a></p>
       <div class="date">2026-02 · 估值一年内 3 倍+</div>
     </div>
     <div class="news">
@@ -644,23 +659,28 @@
     <div class="chart">
       <div class="chart-title">
         <h3>HF Open ASR Leaderboard(en_shortform)</h3>
-        <span>平均 WER% · 条形长度≈错误率(越短越好) · 2026-05 快照</span>
+        <span>平均 WER% · 默认口径含 Voice Arena 与私有集 · 条形长度≈错误率(越短越好) · 2026-08 快照</span>
       </div>
       <!-- 条宽 = WER/10*100,直接线性映射 -->
-      <div class="bar-row"><div class="bar-name">Granite Speech 4.1 2B<span class="pill">IBM</span></div><div class="bar-track"><div class="bar-fill top" style="--w:53.3"></div></div><div class="bar-val"><b>5.33</b></div></div>
-      <div class="bar-row"><div class="bar-name">Cohere Transcribe<span class="pill">Cohere</span></div><div class="bar-track"><div class="bar-fill top" style="--w:54.2"></div></div><div class="bar-val"><b>5.42</b></div></div>
-      <div class="bar-row"><div class="bar-name">Granite 4.0 1B Speech<span class="pill">IBM</span></div><div class="bar-track"><div class="bar-fill top" style="--w:55.2"></div></div><div class="bar-val"><b>5.52</b></div></div>
-      <div class="bar-row"><div class="bar-name">Canary-Qwen 2.5B<span class="pill">NVIDIA</span></div><div class="bar-track"><div class="bar-fill good" style="--w:56.3"></div></div><div class="bar-val"><b>5.63</b></div></div>
-      <div class="bar-row"><div class="bar-name">Granite Speech 3.3 8B<span class="pill">IBM</span></div><div class="bar-track"><div class="bar-fill good" style="--w:57.4"></div></div><div class="bar-val"><b>5.74</b></div></div>
-      <div class="bar-row"><div class="bar-name">Qwen3-ASR-1.7B<span class="pill">Alibaba</span></div><div class="bar-track"><div class="bar-fill good" style="--w:57.6"></div></div><div class="bar-val"><b>5.76</b></div></div>
-      <div class="bar-row"><div class="bar-name">Scribe v2<span class="pill cloud">ElevenLabs·云</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:58.3"></div></div><div class="bar-val"><b>5.83</b></div></div>
-      <div class="bar-row"><div class="bar-name">Phi-4 Multimodal<span class="pill">Microsoft</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:60.2"></div></div><div class="bar-val"><b>6.02</b></div></div>
-      <div class="bar-row"><div class="bar-name">Parakeet TDT 0.6B v2<span class="pill">NVIDIA</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:60.5"></div></div><div class="bar-val"><b>6.05</b></div></div>
-      <div class="bar-row"><div class="bar-name">Voxtral Small 24B<span class="pill">Mistral</span></div><div class="bar-track"><div class="bar-fill low" style="--w:66.2"></div></div><div class="bar-val"><b>6.62</b></div></div>
-      <div class="bar-row"><div class="bar-name">Whisper Large v3<span class="pill">OpenAI</span></div><div class="bar-track"><div class="bar-fill low" style="--w:74.4"></div></div><div class="bar-val"><b>7.44</b></div></div>
-      <div class="bar-row"><div class="bar-name">Whisper Large v3 Turbo<span class="pill">OpenAI</span></div><div class="bar-track"><div class="bar-fill low" style="--w:78.3"></div></div><div class="bar-val"><b>7.83</b></div></div>
-      <div class="note">榜单多为朗读/广播语音;真实会议、多人重叠、口音场景下差距会被放大(见 GigaSpeechBench)。Whisper 虽精度落后,但语言覆盖(99+)与生态仍无可替代。</div>
-      <div class="srcs">榜单与数字来源:<a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard" target="_blank" rel="noopener">HF Open ASR Leaderboard</a> · <a href="https://www.gladia.io/blog/best-open-source-speech-to-text-models" target="_blank" rel="noopener">Gladia 2026 开源模型盘点</a> · <a href="https://www.codesota.com/speech-to-text" target="_blank" rel="noopener">Speech-to-Text WER 汇总</a></div>
+      <div class="bar-row"><div class="bar-name">Resonant-1<span class="pill cloud">Reson8·云</span></div><div class="bar-track"><div class="bar-fill top" style="--w:47.7"></div></div><div class="bar-val"><b>4.77</b></div></div>
+      <div class="bar-row"><div class="bar-name">Scribe v2<span class="pill cloud">ElevenLabs·云</span></div><div class="bar-track"><div class="bar-fill top" style="--w:48.4"></div></div><div class="bar-val"><b>4.84</b></div></div>
+      <div class="bar-row"><div class="bar-name">Azure Speech 06-2026<span class="pill cloud">Microsoft·云</span></div><div class="bar-track"><div class="bar-fill top" style="--w:49.1"></div></div><div class="bar-val"><b>4.91</b></div></div>
+      <div class="bar-row"><div class="bar-name">Qwen3-ASR-1.7B<span class="pill">Alibaba · 开源第一</span></div><div class="bar-track"><div class="bar-fill top" style="--w:49.5"></div></div><div class="bar-val"><b>4.95</b></div></div>
+      <div class="bar-row"><div class="bar-name">ARK-ASR-3B<span class="pill">AutoArk AI</span></div><div class="bar-track"><div class="bar-fill good" style="--w:51.8"></div></div><div class="bar-val"><b>5.18</b></div></div>
+      <div class="bar-row"><div class="bar-name">Hojo-ASR-V1<span class="pill">HojoAI</span></div><div class="bar-track"><div class="bar-fill good" style="--w:52.1"></div></div><div class="bar-val"><b>5.21</b></div></div>
+      <div class="bar-row"><div class="bar-name">Canary-Qwen 2.5B<span class="pill">NVIDIA</span></div><div class="bar-track"><div class="bar-fill good" style="--w:52.3"></div></div><div class="bar-val"><b>5.23</b></div></div>
+      <div class="bar-row"><div class="bar-name">Higgs Audio v3 STT<span class="pill">Boson AI</span></div><div class="bar-track"><div class="bar-fill good" style="--w:53.2"></div></div><div class="bar-val"><b>5.32</b></div></div>
+      <div class="bar-row"><div class="bar-name">Cohere Transcribe<span class="pill">Cohere</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:54.0"></div></div><div class="bar-val"><b>5.40</b></div></div>
+      <div class="bar-row"><div class="bar-name">Granite Speech 4.1 2B<span class="pill">IBM</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:54.3"></div></div><div class="bar-val"><b>5.43</b></div></div>
+      <div class="bar-row"><div class="bar-name">Parakeet TDT 0.6B v2<span class="pill">NVIDIA</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:54.8"></div></div><div class="bar-val"><b>5.48</b></div></div>
+      <div class="bar-row"><div class="bar-name">MOSS-Transcribe-Diarize<span class="pill">OpenMOSS</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:55.2"></div></div><div class="bar-val"><b>5.52</b></div></div>
+      <div class="bar-row"><div class="bar-name">Granite Speech 5.0 470M TurboCTC<span class="pill">IBM</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:55.5"></div></div><div class="bar-val"><b>5.55</b></div></div>
+      <div class="bar-row"><div class="bar-name">Phi-4 Multimodal<span class="pill">Microsoft</span></div><div class="bar-track"><div class="bar-fill low" style="--w:57.2"></div></div><div class="bar-val"><b>5.72</b></div></div>
+      <div class="bar-row"><div class="bar-name">Voxtral Small 24B<span class="pill">Mistral</span></div><div class="bar-track"><div class="bar-fill low" style="--w:57.9"></div></div><div class="bar-val"><b>5.79</b></div></div>
+      <div class="bar-row"><div class="bar-name">Whisper Large v3<span class="pill">OpenAI</span></div><div class="bar-track"><div class="bar-fill low" style="--w:65.0"></div></div><div class="bar-val"><b>6.50</b></div></div>
+      <div class="bar-row"><div class="bar-name">Whisper Large v3 Turbo<span class="pill">OpenAI</span></div><div class="bar-track"><div class="bar-fill bad" style="--w:70.3"></div></div><div class="bar-val"><b>7.03</b></div></div>
+      <div class="note">2026-05 起移除 Tedlium,2026-08 版默认计入 Voice Arena 印度口音英语与 Appen/Dataocean 私有集,分数不可与旧口径直接对比;Qwen3-ASR-1.7B 登顶开源,商用 API(Resonant-1 / vFast / Scribe v2)重回全榜前三。真实会议、多人重叠、口音场景仍需 GigaSpeechBench 复测;Whisper 精度落后,但语言覆盖(99+)与生态无可替代。</div>
+      <div class="srcs">榜单与数字来源:<a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard" target="_blank" rel="noopener">HF Open ASR Leaderboard</a> · <a href="https://huggingface.co/blog/open-asr-leaderboard-global-south" target="_blank" rel="noopener">HF Blog:全球南向更新</a> · <a href="https://www.gladia.io/blog/best-open-source-speech-to-text-models" target="_blank" rel="noopener">Gladia 2026 开源模型盘点</a></div>
     </div>
   </div>
 
@@ -675,9 +695,10 @@
       <div class="bar-row"><div class="bar-name">Qwen3-ASR-1.7B<span class="pill">阿里 · 52 语种</span></div><div class="bar-track"><div class="bar-fill top" style="--w:12.3"></div></div><div class="bar-val"><b>1.48</b></div></div>
       <div class="bar-row"><div class="bar-name">Paraformer-zh<span class="pill">阿里 · 220M</span></div><div class="bar-track"><div class="bar-fill good" style="--w:16.2"></div></div><div class="bar-val"><b>1.95</b></div></div>
       <div class="bar-row"><div class="bar-name">SenseVoice-Small<span class="pill">阿里 · 234M</span></div><div class="bar-track"><div class="bar-fill good" style="--w:17.9"></div></div><div class="bar-val"><b>2.15</b></div></div>
+      <div class="bar-row"><div class="bar-name">FireRedASR2-LLM<span class="pill">小红书 · 8.3B · 4 集均值</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:28.9"></div></div><div class="bar-val"><b>2.89</b></div></div>
       <div class="bar-row"><div class="bar-name">FireRedASR-LoRA<span class="pill">小红书 · 轻量</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:29.1"></div></div><div class="bar-val"><b>2.91</b></div></div>
       <div class="bar-row"><div class="bar-name">Whisper large-v3<span class="pill">OpenAI</span></div><div class="bar-track"><div class="bar-fill low" style="--w:74"></div></div><div class="bar-val">≈<b>9</b></div></div>
-      <div class="note">不同测试集(AISHELL / WenetSpeech / 方言集)结果差异显著,以上为公开报告典型值。中文首选国产模型:FireRedASR 求精度、Qwen3-ASR 求多语种+方言、Paraformer 求流式速度、SenseVoice 附带情感/事件检测。</div>
+      <div class="note">不同测试集(AISHELL / WenetSpeech / 方言集)结果差异显著,以上为公开报告典型值;FireRedASR2-LLM 为普通话 4 测试集平均口径(方言 19 集平均 11.55%),与 AISHELL-1 单集口径不可直接比较。中文首选国产模型:FireRedASR2 求精度与一体化、Qwen3-ASR 求多语种+方言、Paraformer 求流式速度、SenseVoice 附带情感/事件检测。</div>
     </div>
     <div style="height:14px"></div>
     <table>
@@ -690,7 +711,7 @@
         <tr><td><span class="tname">Whisper 系列</span></td><td class="m">39M–1.55B</td><td class="ok">99+ 语言;生态最丰富;MIT 协议</td><td>多语种兜底、快速原型</td><td class="bad">中文 CER≈9%;静音段幻觉;时间戳粗</td></tr>
       </tbody>
     </table>
-    <div class="srcs">来源:<a href="https://github.com/FireRedTeam/FireRedASR" target="_blank" rel="noopener">FireRedASR 仓库</a> · <a href="https://arxiv.org/abs/2601.21337" target="_blank" rel="noopener">Qwen3-ASR 技术报告</a> · <a href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener">FunASR(Paraformer / SenseVoice)</a> · <a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">GigaSpeechBench</a></div>
+    <div class="srcs">来源:<a href="https://github.com/FireRedTeam/FireRedASR2S" target="_blank" rel="noopener">FireRedASR2S 仓库</a> · <a href="https://arxiv.org/abs/2603.10420" target="_blank" rel="noopener">FireRedASR2 论文</a> · <a href="https://arxiv.org/abs/2601.21337" target="_blank" rel="noopener">Qwen3-ASR 技术报告</a> · <a href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener">FunASR(Paraformer / SenseVoice)</a> · <a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">GigaSpeechBench</a></div>
   </div>
 
   <!-- 小语种与方言 -->
@@ -744,12 +765,14 @@
         <tr><td><span class="tname">SeamlessM4T v2</span></td><td>UnitY2 一体化(S2ST/S2TT/T2ST/T2TT)</td><td class="ok">WMT22 文本翻译 31.2 BLEU;流式版延迟约 1.8s</td><td class="warn">约 100 语言;权重 CC-BY-NC 非商用</td></tr>
         <tr><td><span class="tname">Spire</span></td><td>翻译专精 LLM(Tower)+ 语音离散化继续预训练</td><td class="ok">仅 42.5K 小时语音即超越 SeamlessM4T,且保留文本翻译能力</td><td>"语音作为又一门语言"的低成本路线</td></tr>
         <tr><td><span class="tname">CoT-ST</span></td><td>多模态思维链(先转写、后翻译)</td><td class="ok">CoVoST-2 en-zh 45.2→47.7 BLEU;MuST-C en-zh 19.6→21.2</td><td>LLM 推理可有效吸收级联误差</td></tr>
+        <tr><td><span class="tname">Covo-Audio(腾讯)</span></td><td>7B 端到端音频 LLM(Qwen2.5 骨干)</td><td class="ok">CoVoST-2 en-zh 49.84 / zh-en 26.77 BLEU;MMAU 75.30%</td><td class="warn">自定义许可,商用需审读条款</td></tr>
+        <tr><td><span class="tname">HW-TSC @ IWSLT 2026</span></td><td>级联:流式 Qwen3-ASR 两遍转写 + Qwen3-ForcedAligner 精对齐 + Qwen3-8B 上下文翻译</td><td class="ok">tst-2022 En-Zh COMET 0.8462 / En-De 0.7854,显著超级联基线</td><td>长音频无分割场景工程范本</td></tr>
         <tr><td><span class="tname">GPT-4o / Claude / DeepSeek</span></td><td>级联:ASR → LLM 字幕翻译</td><td class="ok">术语表+体例约束+长度校验后接近人工水平</td><td class="warn">字幕行长/CPS 仍需硬校验兜底</td></tr>
         <tr><td><span class="tname">GigaSpeechBench AST</span></td><td>评测基准(11 语人工中英译文)</td><td class="warn">商用 API 真实场景语音翻译劣化显著</td><td>选型前先按目标语复测</td></tr>
       </tbody>
     </table>
     <div class="note">端到端 S2TT 减少 ASR 误差传播,但字幕体例(行长、CPS、口语化)仍需 LLM 后处理;生产环境主流仍是"ASR → LLM 字幕体例翻译"的级联管线。</div>
-    <div class="srcs">来源:<a href="https://arxiv.org/abs/2503.10620" target="_blank" rel="noopener">From Tower to Spire(arXiv:2503.10620)</a> · <a href="https://arxiv.org/abs/2409.19510" target="_blank" rel="noopener">CoT-ST(arXiv:2409.19510)</a> · <a href="https://github.com/facebookresearch/seamless_communication" target="_blank" rel="noopener">SeamlessM4T 仓库</a> · <a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">GigaSpeechBench AST</a></div>
+    <div class="srcs">来源:<a href="https://arxiv.org/abs/2503.10620" target="_blank" rel="noopener">From Tower to Spire(arXiv:2503.10620)</a> · <a href="https://arxiv.org/abs/2409.19510" target="_blank" rel="noopener">CoT-ST(arXiv:2409.19510)</a> · <a href="https://github.com/Tencent/Covo-Audio" target="_blank" rel="noopener">Covo-Audio 仓库</a> · <a href="https://aclanthology.org/2026.iwslt-1.9.pdf" target="_blank" rel="noopener">HW-TSC @ IWSLT 2026 论文</a> · <a href="https://github.com/facebookresearch/seamless_communication" target="_blank" rel="noopener">SeamlessM4T 仓库</a> · <a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">GigaSpeechBench AST</a></div>
   </div>
 
   <!-- 打轴:强制对齐 -->
@@ -759,11 +782,13 @@
         <h3>对齐精度 · 时间戳偏移(毫秒,越低越好)</h3>
         <span>各口径来自官方报告与社区实测,量级对比仅供参考</span>
       </div>
-      <div class="bar-row"><div class="bar-name">Qwen3-ForcedAligner<span class="pill">AAS·官方</span></div><div class="bar-track"><div class="bar-fill top" style="--w:4.8"></div></div><div class="bar-val"><b>4.4</b> ms</div></div>
-      <div class="bar-row"><div class="bar-name">MFA 3.0<span class="pill">边界误差·官方</span></div><div class="bar-track"><div class="bar-fill good" style="--w:16.5"></div></div><div class="bar-val"><b>15</b> ms</div></div>
-      <div class="bar-row"><div class="bar-name">Qwen3-FA 字级实测<span class="pill">社区·口音中文</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:55"></div></div><div class="bar-val"><b>50</b> ms</div></div>
-      <div class="bar-row"><div class="bar-name">WhisperX 字级实测<span class="pill">社区·同环境</span></div><div class="bar-track"><div class="bar-fill low" style="--w:88"></div></div><div class="bar-val"><b>80</b> ms</div></div>
-      <div class="note">Qwen3-ForcedAligner 官方 AAS 评测超越 NeMo-Forced-Aligner 等三大对齐器;MFA 3.0 在四个基准上平均边界误差 &lt;15ms 达 SOTA/近 SOTA。学术对照(TIMIT/Buckeye)显示经典 MFA 的词对齐仍优于 WhisperX/MMS——"传统未死,范式更替正在发生"。</div>
+      <div class="bar-row"><div class="bar-name">MFA 3.0<span class="pill">平均边界误差·官方</span></div><div class="bar-track"><div class="bar-fill top" style="--w:9.3"></div></div><div class="bar-val"><b>&lt;15</b> ms</div></div>
+      <div class="bar-row"><div class="bar-name">Qwen3-ForcedAligner · 中<span class="pill">AAS·官方报告</span></div><div class="bar-track"><div class="bar-fill top" style="--w:20.5"></div></div><div class="bar-val"><b>33.1</b> ms</div></div>
+      <div class="bar-row"><div class="bar-name">Qwen3-ForcedAligner · 英<span class="pill">AAS·官方报告</span></div><div class="bar-track"><div class="bar-fill good" style="--w:23.3"></div></div><div class="bar-val"><b>37.5</b> ms</div></div>
+      <div class="bar-row"><div class="bar-name">WhisperX · 英<span class="pill">AAS·同基准</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:57.2"></div></div><div class="bar-val"><b>92.1</b> ms</div></div>
+      <div class="bar-row"><div class="bar-name">NeMo NFA · 英<span class="pill">AAS·同基准</span></div><div class="bar-track"><div class="bar-fill low" style="--w:66.7"></div></div><div class="bar-val"><b>107.5</b> ms</div></div>
+      <div class="bar-row"><div class="bar-name">Monotonic-Aligner · 中<span class="pill">AAS·同基准</span></div><div class="bar-track"><div class="bar-fill low" style="--w:100"></div></div><div class="bar-val bad"><b>161.1</b> ms</div></div>
+      <div class="note">据 Qwen3-ASR 技术报告(arXiv:2601.21337)MFA 标注集实测:Qwen3-ForcedAligner 中/英 AAS 33.1/37.5ms,全面超越 WhisperX(92.1ms)、NeMo NFA(107.5ms)、Monotonic-Aligner(161.1ms)三大对齐器;MFA 3.0 平均边界误差 &lt;15ms 为另一口径。HW-TSC 在 IWSLT 2026 离线语音翻译任务中即以 Qwen3-ForcedAligner 做两遍转写精对齐。学术对照(TIMIT/Buckeye)显示经典 MFA 的词对齐仍优于 WhisperX/MMS——"传统未死,范式更替正在发生"。</div>
     </div>
     <div style="height:14px"></div>
     <table>
@@ -789,7 +814,7 @@
       </tbody>
     </table>
     <div class="note">生产建议:识别与对齐解耦——任意 ASR 后接统一对齐器;Whisper 系可用 C 路线内建时间戳,Granite/Qwen 等无原生词级时间戳的模型接 A/B 路线对齐器,避免"线性插值假时间戳"在长句尾部累积秒级误差。</div>
-    <div class="srcs">来源:<a href="https://github.com/QwenLM/Qwen3-ForcedAligner" target="_blank" rel="noopener">Qwen3-ForcedAligner</a> · <a href="https://montreal-forced-aligner.readthedocs.io/" target="_blank" rel="noopener">MFA 3.0 官方文档</a> · <a href="https://arxiv.org/abs/2303.00747" target="_blank" rel="noopener">WhisperX 论文</a> · <a href="https://arxiv.org/abs/2305.13516" target="_blank" rel="noopener">MMS 论文(1130+ 语)</a> · <a href="https://arxiv.org/abs/2606.18466" target="_blank" rel="noopener">MFA 2026 对齐综述</a> · <a href="https://github.com/NVIDIA/NeMo" target="_blank" rel="noopener">NeMo NFA</a> · <a href="https://github.com/readbeyond/aeneas" target="_blank" rel="noopener">Aeneas</a></div>
+    <div class="srcs">来源:<a href="https://github.com/QwenLM/Qwen3-ForcedAligner" target="_blank" rel="noopener">Qwen3-ForcedAligner</a> · <a href="https://arxiv.org/abs/2601.21337" target="_blank" rel="noopener">Qwen3-ASR 技术报告(AAS 数据)</a> · <a href="https://montreal-forced-aligner.readthedocs.io/" target="_blank" rel="noopener">MFA 3.0 官方文档</a> · <a href="https://arxiv.org/abs/2303.00747" target="_blank" rel="noopener">WhisperX 论文</a> · <a href="https://arxiv.org/abs/2305.13516" target="_blank" rel="noopener">MMS 论文(1130+ 语)</a> · <a href="https://arxiv.org/abs/2606.18466" target="_blank" rel="noopener">MFA 2026 对齐综述</a> · <a href="https://github.com/NVIDIA/NeMo" target="_blank" rel="noopener">NeMo NFA</a> · <a href="https://github.com/readbeyond/aeneas" target="_blank" rel="noopener">Aeneas</a></div>
   </div>
 
   <!-- 商用 API -->
@@ -817,7 +842,7 @@
   <div class="sec-head">
     <div class="sec-num">SECTION 04 · OPEN SOURCE</div>
     <h2>高星开源项目</h2>
-    <p>字幕与翻译方向最活跃的开源项目,按"模型基座 / 视频字幕管线 / 翻译与双语工具 / 字幕工程"分类。★ 为 2026-08 约值,请以 GitHub 实时数据为准。</p>
+    <p>字幕与翻译方向最活跃的开源项目,按"模型基座 / 视频字幕管线 / 翻译与双语工具 / 字幕工程"分类。★ 为 2026-09-01 GitHub 实测值(四舍五入),以实时数据为准。</p>
   </div>
 
   <div class="toolbar">
@@ -834,42 +859,42 @@
   <div class="repo-grid" id="repoGrid">
 
     <div class="repo" data-cat="asr" data-k="whisper openai 语音识别 99语言 生态">
-      <div class="repo-top"><h3>openai/whisper<small>ASR 生态基石</small></h3><span class="stars">★ 80k</span></div>
+      <div class="repo-top"><h3>openai/whisper<small>ASR 生态基石</small></h3><span class="stars">★ 108k</span></div>
       <p>99+ 语言转写/翻译/时间戳一体,MIT 协议。几乎所有字幕管线的默认起点,衍生生态最丰富。</p>
       <div class="repo-tags"><span class="rtag">99 语言</span><span class="rtag">MIT</span><span class="rtag">时间戳</span></div>
       <a class="repo-link" href="https://github.com/openai/whisper" target="_blank" rel="noopener">github.com/openai/whisper ↗</a>
     </div>
 
     <div class="repo" data-cat="asr" data-k="whisper.cpp 本地部署 cpu metal 边缘">
-      <div class="repo-top"><h3>whisper.cpp<small>C/C++ 本地推理</small></h3><span class="stars">★ 41k</span></div>
+      <div class="repo-top"><h3>whisper.cpp<small>C/C++ 本地推理</small></h3><span class="stars">★ 53k</span></div>
       <p>CPU / Metal / Vulkan / WASM 全平台,无 GPU 也能跑,隐私场景与边缘设备部署的事实标准。</p>
       <div class="repo-tags"><span class="rtag">无 GPU 可用</span><span class="rtag">本地/离线</span><span class="rtag">量化</span></div>
       <a class="repo-link" href="https://github.com/ggml-org/whisper.cpp" target="_blank" rel="noopener">github.com/ggml-org/whisper.cpp ↗</a>
     </div>
 
     <div class="repo" data-cat="asr" data-k="faster-whisper ctranslate2 加速">
-      <div class="repo-top"><h3>faster-whisper<small>CTranslate2 加速版</small></h3><span class="stars">★ 17k</span></div>
+      <div class="repo-top"><h3>faster-whisper<small>CTranslate2 加速版</small></h3><span class="stars">★ 25k</span></div>
       <p>同样的模型 4 倍速、显存减半,支持 INT8 量化。pyvideotrans 等工具的默认识别后端。</p>
       <div class="repo-tags"><span class="rtag">4× 提速</span><span class="rtag">INT8</span><span class="rtag">批处理</span></div>
       <a class="repo-link" href="https://github.com/SYSTRAN/faster-whisper" target="_blank" rel="noopener">github.com/SYSTRAN/faster-whisper ↗</a>
     </div>
 
     <div class="repo" data-cat="asr" data-k="whisperx 对齐 说话人分离 字级时间戳">
-      <div class="repo-top"><h3>WhisperX<small>字级对齐 + 说话人</small></h3><span class="stars">★ 16k</span></div>
+      <div class="repo-top"><h3>WhisperX<small>字级对齐 + 说话人</small></h3><span class="stars">★ 24k</span></div>
       <p>wav2vec2 强制对齐给出<strong>字级时间戳</strong>,集成 pyannote 说话人分离——高质量字幕的时间轴刚需。</p>
       <div class="repo-tags"><span class="rtag">字级时间戳</span><span class="rtag">diarization</span></div>
       <a class="repo-link" href="https://github.com/m-bain/whisperX" target="_blank" rel="noopener">github.com/m-bain/whisperX ↗</a>
     </div>
 
     <div class="repo" data-cat="pipe" data-k="videolingo netflix 字幕 切句 对齐 配音">
-      <div class="repo-top"><h3>VideoLingo<small>Netflix 级字幕管线</small></h3><span class="stars">★ 18.2k</span></div>
+      <div class="repo-top"><h3>VideoLingo<small>Netflix 级字幕管线</small></h3><span class="stars">★ 18.3k</span></div>
       <p>"剪句→翻译→对齐→配音"一键全自动,NLP 断句遵守字幕规范,双语字幕输出,倍受视频搬运/译制组欢迎。</p>
       <div class="repo-tags"><span class="rtag">一键管线</span><span class="rtag">双语字幕</span><span class="rtag">配音</span></div>
       <a class="repo-link" href="https://github.com/Huanshere/VideoLingo" target="_blank" rel="noopener">github.com/Huanshere/VideoLingo ↗</a>
     </div>
 
     <div class="repo" data-cat="pipe" data-k="pyvideotrans 视频翻译配音 gui 剪映">
-      <div class="repo-top"><h3>pyvideotrans<small>全能视频翻译配音</small></h3><span class="stars">★ 13k</span></div>
+      <div class="repo-top"><h3>pyvideotrans<small>全能视频翻译配音</small></h3><span class="stars">★ 18.9k</span></div>
       <p>桌面 GUI,聚合 faster-whisper / FunASR / Gemini 等识别渠道 + 多翻译渠道 + 多 TTS 配音,面向非程序员创作者。</p>
       <div class="repo-tags"><span class="rtag">GUI</span><span class="rtag">多后端</span><span class="rtag">配音</span></div>
       <a class="repo-link" href="https://github.com/jianchang512/pyvideotrans" target="_blank" rel="noopener">github.com/jianchang512/pyvideotrans ↗</a>
@@ -890,35 +915,35 @@
     </div>
 
     <div class="repo" data-cat="pipe" data-k="openlrc lrc 歌词 字幕 gpt claude">
-      <div class="repo-top"><h3>openlrc<small>音频→LRC/字幕</small></h3><span class="stars">★ 673</span></div>
+      <div class="repo-top"><h3>openlrc<small>音频→LRC/字幕</small></h3><span class="stars">★ 675</span></div>
       <p>用 Whisper + LLM(GPT/Claude)转录翻译音频为 LRC/字幕文件,歌词场景的精细打磨代表。</p>
       <div class="repo-tags"><span class="rtag">歌词</span><span class="rtag">LLM 翻译</span></div>
       <a class="repo-link" href="https://github.com/zh-plus/openlrc" target="_blank" rel="noopener">github.com/zh-plus/openlrc ↗</a>
     </div>
 
     <div class="repo" data-cat="trans" data-k="immersive translate 沉浸式翻译 双语 视频 网页">
-      <div class="repo-top"><h3>沉浸式翻译<small>Immersive Translate</small></h3><span class="stars">★ 10k+</span></div>
+      <div class="repo-top"><h3>沉浸式翻译<small>Immersive Translate</small></h3><span class="stars">★ 18.7k</span></div>
       <p>网页/PDF/视频双语显示的浏览器扩展,支持多翻译引擎与 LLM,视频双语字幕是其招牌能力。</p>
       <div class="repo-tags"><span class="rtag">双语字幕</span><span class="rtag">浏览器扩展</span><span class="rtag">多引擎</span></div>
       <a class="repo-link" href="https://github.com/immersive-translate/immersive-translate" target="_blank" rel="noopener">github.com/immersive-translate ↗</a>
     </div>
 
     <div class="repo" data-cat="trans" data-k="pot desktop 翻译 ocr 划词">
-      <div class="repo-top"><h3>pot-desktop<small>划词翻译/OCR</small></h3><span class="stars">★ 11k</span></div>
+      <div class="repo-top"><h3>pot-desktop<small>划词翻译/OCR</small></h3><span class="stars">★ 19.4k</span></div>
       <p>跨平台划词翻译+截图 OCR,可接各类 LLM,字幕组查术语、校对时的桌面常备工具。</p>
       <div class="repo-tags"><span class="rtag">划词</span><span class="rtag">OCR</span><span class="rtag">多插件</span></div>
       <a class="repo-link" href="https://github.com/pot-app/pot-desktop" target="_blank" rel="noopener">github.com/pot-app/pot-desktop ↗</a>
     </div>
 
     <div class="repo" data-cat="trans" data-k="luna translator 游戏 翻译 hook ocr">
-      <div class="repo-top"><h3>LunaTranslator<small>游戏/文本翻译</small></h3><span class="stars">★ 5k+</span></div>
+      <div class="repo-top"><h3>LunaTranslator<small>游戏/文本翻译</small></h3><span class="stars">★ 13k</span></div>
       <p>游戏文本 Hook + OCR + TTS 一体,本地化与游戏字幕翻译领域的活跃项目。</p>
       <div class="repo-tags"><span class="rtag">游戏本地化</span><span class="rtag">OCR</span></div>
       <a class="repo-link" href="https://github.com/HIllya51/LunaTranslator" target="_blank" rel="noopener">github.com/HIllya51/LunaTranslator ↗</a>
     </div>
 
     <div class="repo" data-cat="edit" data-k="subtitle edit 字幕编辑 whisper 内置">
-      <div class="repo-top"><h3>Subtitle Edit<small>老牌字幕编辑器</small></h3><span class="stars">★ 11k+</span></div>
+      <div class="repo-top"><h3>Subtitle Edit<small>老牌字幕编辑器</small></h3><span class="stars">★ 14k</span></div>
       <p>支持 200+ 字幕格式,内置 Whisper 等多种识别引擎,波形图时间轴编辑是审校阶段的主力工具。</p>
       <div class="repo-tags"><span class="rtag">200+ 格式</span><span class="rtag">内置 ASR</span><span class="rtag">波形编辑</span></div>
       <a class="repo-link" href="https://github.com/SubtitleEdit/subtitleedit" target="_blank" rel="noopener">github.com/SubtitleEdit/subtitleedit ↗</a>
@@ -932,49 +957,49 @@
     </div>
 
     <div class="repo" data-cat="edit" data-k="ccextractor 隐藏字幕 提取 cc">
-      <div class="repo-top"><h3>CCExtractor<small>CC 隐藏字幕提取</small></h3><span class="stars">★ 2k+</span></div>
+      <div class="repo-top"><h3>CCExtractor<small>CC 隐藏字幕提取</small></h3><span class="stars">★ 900</span></div>
       <p>从录制视频/流中提取闭合字幕(CC)转为 SRT,直播回放与电视节目字幕的抢救利器。</p>
       <div class="repo-tags"><span class="rtag">CC/608/708</span><span class="rtag">流媒体</span></div>
       <a class="repo-link" href="https://github.com/CCExtractor/ccextractor" target="_blank" rel="noopener">github.com/CCExtractor/ccextractor ↗</a>
     </div>
 
     <div class="repo" data-cat="asr" data-k="funasr 阿里 paraformer sensevoice 工具包">
-      <div class="repo-top"><h3>FunASR<small>阿里语音工具包</small></h3><span class="stars">★ 10k+</span></div>
+      <div class="repo-top"><h3>FunASR<small>阿里语音工具包</small></h3><span class="stars">★ 20.1k</span></div>
       <p>Paraformer / SenseVoice 等模型的官方工具箱,含 VAD、标点、说话人、时间戳全链路组件。</p>
       <div class="repo-tags"><span class="rtag">全链路</span><span class="rtag">工业级</span></div>
       <a class="repo-link" href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener">github.com/modelscope/FunASR ↗</a>
     </div>
 
     <div class="repo" data-cat="asr" data-k="sensevoice 情感 事件 中文">
-      <div class="repo-top"><h3>SenseVoice<small>多功能中文 ASR</small></h3><span class="stars">★ 11k+</span></div>
+      <div class="repo-top"><h3>SenseVoice<small>多功能中文 ASR</small></h3><span class="stars">★ 9.2k</span></div>
       <p>识别+情感+音频事件(笑声/掌声)一体,速度远超 Whisper-small,中文字幕加"情绪标记"的好选择。</p>
       <div class="repo-tags"><span class="rtag">情感识别</span><span class="rtag">极快</span></div>
       <a class="repo-link" href="https://github.com/FunAudioLLM/SenseVoice" target="_blank" rel="noopener">github.com/FunAudioLLM/SenseVoice ↗</a>
     </div>
 
     <div class="repo" data-cat="asr" data-k="fireredasr 中文 cer 热词">
-      <div class="repo-top"><h3>FireRedASR<small>中文精度标杆</small></h3><span class="stars">★ 4k+</span></div>
+      <div class="repo-top"><h3>FireRedASR<small>中文精度标杆</small></h3><span class="stars">★ 2k</span></div>
       <p>CER 0.57% 的开源中文 SOTA,支持热词定制,中文影视/课程字幕的精度首选。</p>
       <div class="repo-tags"><span class="rtag">CER 0.57%</span><span class="rtag">热词</span></div>
       <a class="repo-link" href="https://github.com/FireRedTeam/FireRedASR" target="_blank" rel="noopener">github.com/FireRedTeam/FireRedASR ↗</a>
     </div>
 
     <div class="repo" data-cat="asr" data-k="sherpa-onnx 部署 跨平台 移动端 流式">
-      <div class="repo-top"><h3>sherpa-onnx<small>跨平台部署框架</small></h3><span class="stars">★ 6k+</span></div>
+      <div class="repo-top"><h3>sherpa-onnx<small>跨平台部署框架</small></h3><span class="stars">★ 14.5k</span></div>
       <p>ONNX 运行时把各类 ASR 模型带到 Android/iOS/嵌入式/浏览器,支持流式,移动端字幕的基建。</p>
       <div class="repo-tags"><span class="rtag">移动端</span><span class="rtag">流式</span><span class="rtag">WASM</span></div>
       <a class="repo-link" href="https://github.com/k2-fsa/sherpa-onnx" target="_blank" rel="noopener">github.com/k2-fsa/sherpa-onnx ↗</a>
     </div>
 
     <div class="repo" data-cat="edit" data-k="buzz 桌面 app 字幕 跨平台">
-      <div class="repo-top"><h3>Buzz<small>桌面字幕 App</small></h3><span class="stars">★ 12k+</span></div>
+      <div class="repo-top"><h3>Buzz<small>桌面字幕 App</small></h3><span class="stars">★ 21.2k</span></div>
       <p>基于 Whisper 的跨平台桌面应用,拖入音视频即出 SRT/VTT,离线可用,个人用户最省心的入口。</p>
       <div class="repo-tags"><span class="rtag">桌面离线</span><span class="rtag">零门槛</span></div>
       <a class="repo-link" href="https://github.com/chidiwilliams/Buzz" target="_blank" rel="noopener">github.com/chidiwilliams/Buzz ↗</a>
     </div>
 
     <div class="repo" data-cat="edit" data-k="subgen plex emby jellyfin 自动字幕">
-      <div class="repo-top"><h3>subgen<small>媒体库自动字幕</small></h3><span class="stars">★ 1k+</span></div>
+      <div class="repo-top"><h3>subgen<small>媒体库自动字幕</small></h3><span class="stars">★ 1.5k</span></div>
       <p>给 Plex / Emby / Jellyfin 媒体库自动生成字幕(Whisper),追剧党自建影视库的标配插件。</p>
       <div class="repo-tags"><span class="rtag">Plex/Emby</span><span class="rtag">自动化</span></div>
       <a class="repo-link" href="https://github.com/McloudIT/subgen" target="_blank" rel="noopener">subgen · media server subtitle ↗</a>
@@ -1808,7 +1833,7 @@
   <div class="foot-inner">
     <div>
       <h4>关于本看板</h4>
-      <p>围绕「字幕 × 翻译 × AI」主题的静态资讯看板:模型测评、开源项目库、应用产品、经典案例与平台策略、制作流程、应用场景、痛点全景与学习路径。数据为 2026-08 快照,<b>每两周更新一次</b>;GitHub 星数为约值(以实时为准),评测分数以各官方榜单口径为准。各板块"来源"行与页脚链接均可点击查阅原文。</p>
+      <p>围绕「字幕 × 翻译 × AI」主题的静态资讯看板:模型测评、开源项目库、应用产品、经典案例与平台策略、制作流程、应用场景、痛点全景与学习路径。数据为 2026-09 快照,<b>每两周更新一次</b>;GitHub 星数为约值(以实时为准),评测分数以各官方榜单口径为准。各板块"来源"行与页脚链接均可点击查阅原文。</p>
     </div>
     <div>
       <h4>主要数据来源</h4>
@@ -1834,7 +1859,7 @@
   </div>
   <div class="copyright">
     <span>SubTrans·Hub — 字幕与翻译 · AI 工具库 & 资讯看板</span>
-    <span>数据截至 2026-08 · 每两周更新 · 仅供选型参考</span>
+    <span>数据截至 2026-09 · 每两周更新 · 仅供选型参考</span>
   </div>
 </footer>
 
