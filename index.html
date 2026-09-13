@@ -759,20 +759,33 @@
       <div class="note">Whisper 在爱尔兰语上因"插入式幻觉"输出多于参考文本的 token,WER 超 100%(large-v3-turbo 在 FLEURS 上插入率高达 491%);单一朗读语音基准会高估 33–43 个点。极端低资源语必须先跑真实场景基准再选型。</div>
     </div>
     <div style="height:14px"></div>
+    <div class="chart">
+      <div class="chart-title">
+        <h3>挪威语追踪 · Bokmål WER%(FLEURS)</h3>
+        <span>越低越好 · NB-Whisper(挪威国家图书馆)本地微调 vs 原版 Whisper · Interspeech 2024</span>
+      </div>
+      <div class="bar-row"><div class="bar-name">NB-Whisper Large<span class="pill">定制微调</span></div><div class="bar-track"><div class="bar-fill top" style="--w:5.9"></div></div><div class="bar-val"><b>6.6</b></div></div>
+      <div class="bar-row"><div class="bar-name">Whisper large-v3<span class="pill">原版</span></div><div class="bar-track"><div class="bar-fill good" style="--w:9.4"></div></div><div class="bar-val"><b>10.4</b></div></div>
+      <div class="bar-row"><div class="bar-name">NB-Wav2Vec2 1B<span class="pill">本地基线</span></div><div class="bar-track"><div class="bar-fill mid" style="--w:9.6"></div></div><div class="bar-val"><b>10.7</b></div></div>
+      <div class="bar-row"><div class="bar-name">Whisper large-v1<span class="pill">原版</span></div><div class="bar-track"><div class="bar-fill bad" style="--w:11.9"></div></div><div class="bar-val"><b>13.2</b></div></div>
+      <div class="note">挪威语核心挑战:双书面语(Bokmål / Nynorsk)+ 丰富的方言多样性。NB-Whisper 基于国家图书馆 22k 小时弱对齐本土语料微调,朗读语料 NST 上 WER 仅 2.2(原版 large-v3 为 6.8);家族持续迭代(large / secure / distil-turbo 0.8B 蒸馏版),Apache 2.0 可商用。NST 2.2 与 FLEURS 6.6 的差距再次说明:朗读基准会显著高估真实表现。</div>
+    </div>
+    <div style="height:14px"></div>
     <table>
       <thead><tr><th>模型 / 服务</th><th>语言覆盖</th><th>小语种 &amp; 方言要点</th><th>许可 / 限制</th></tr></thead>
       <tbody>
         <tr><td><span class="tname">Qwen3-ASR</span></td><td class="m">30 语言 + 22 中文方言</td><td class="ok">吴语/闽南语/港澳粤语等方言 SOTA;覆盖中东与东南亚语言</td><td>Apache 2.0</td></tr>
         <tr><td><span class="tname">ElevenLabs Scribe v2</span></td><td class="m">90+ 语言</td><td class="ok">标准基准 WER 1.7–3.9%;支持 1000 词热词提示;实时延迟约 150ms</td><td>商用 API</td></tr>
         <tr><td><span class="tname">Whisper</span></td><td class="m">98 语言</td><td class="warn">覆盖广但严重不均,低资源语幻觉重(爱尔兰语 &gt;100% WER)</td><td>MIT</td></tr>
+        <tr><td><span class="tname">NB-Whisper(挪威国家图书馆)</span></td><td class="m">Bokmål + Nynorsk</td><td class="ok">22k 小时本土语料微调 Whisper;FLEURS 6.6 / NST 2.2,方言与双书面语适配最佳;持续迭代蒸馏版</td><td>Apache 2.0</td></tr>
         <tr><td><span class="tname">MMS(Meta)</span></td><td class="m">1100+ 语言</td><td class="ok">覆盖之王,附带对齐器支持 1130+ 语言;精度让位于广度</td><td class="warn">CC-BY-NC 4.0</td></tr>
         <tr><td><span class="tname">SeamlessM4T v2</span></td><td class="m">约 100 入 / 96 文本出</td><td class="ok">低资源语对(约鲁巴/孟加拉/缅甸)增益最大</td><td class="bad">权重非商用</td></tr>
         <tr><td><span class="tname">CAMB.AI</span></td><td class="m">150+ 语言</td><td class="ok">转写+翻译+配音一体化商用管线,覆盖 99% 说话人口</td><td>商用 API</td></tr>
         <tr><td><span class="tname">国内云(讯飞/火山等)</span></td><td class="m">中文方言 + 维/藏等</td><td class="ok">国内小语种与方言深耕,按时长计费成熟</td><td>商用 API</td></tr>
       </tbody>
     </table>
-    <div class="note">选型建议:先在 GigaSpeechBench(12 门中东/东南亚低资源语 + 6 种中文方言)或目标语专属基准上复测;识字覆盖看 MMS,精度看 Qwen3-ASR / Scribe v2,商用闭环看 CAMB.AI。</div>
-    <div class="srcs">来源:<a href="https://arxiv.org/abs/2604.10736" target="_blank" rel="noopener">BlasBench 爱尔兰语基准</a> · <a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">GigaSpeechBench</a> · <a href="https://github.com/facebookresearch/fairseq/tree/main/examples/mms" target="_blank" rel="noopener">Meta MMS</a> · <a href="https://github.com/facebookresearch/seamless_communication" target="_blank" rel="noopener">SeamlessM4T 仓库</a> · <a href="https://www.camb.ai/de/blog-post/speech-to-text-api-benchmark-whisper-vs-elevenlabs-vs-camb-ai-accuracy-latency" target="_blank" rel="noopener">CAMB.AI 多语 API 基准</a></div>
+    <div class="note">选型建议:先在 GigaSpeechBench(12 门中东/东南亚低资源语 + 6 种中文方言)或目标语专属基准上复测;识字覆盖看 MMS,精度看 Qwen3-ASR / Scribe v2,商用闭环看 CAMB.AI;挪威语等欧洲中型语种优先本地定制系列(NB-Whisper),通用大模型再强也难敌本土语料微调。</div>
+    <div class="srcs">来源:<a href="https://arxiv.org/abs/2604.10736" target="_blank" rel="noopener">BlasBench 爱尔兰语基准</a> · <a href="https://arxiv.org/abs/2606.28884" target="_blank" rel="noopener">GigaSpeechBench</a> · <a href="https://github.com/facebookresearch/fairseq/tree/main/examples/mms" target="_blank" rel="noopener">Meta MMS</a> · <a href="https://github.com/facebookresearch/seamless_communication" target="_blank" rel="noopener">SeamlessM4T 仓库</a> · <a href="https://www.camb.ai/de/blog-post/speech-to-text-api-benchmark-whisper-vs-elevenlabs-vs-camb-ai-accuracy-latency" target="_blank" rel="noopener">CAMB.AI 多语 API 基准</a> · 挪威语:<a href="https://www.isca-archive.org/interspeech_2024/kummervold24_interspeech.pdf" target="_blank" rel="noopener">NB-Whisper 论文(Interspeech 2024)</a> · <a href="https://ai.nb.no/models/" target="_blank" rel="noopener">NB AI Lab 模型页</a> · <a href="https://huggingface.co/NbAiLab/nb-whisper-large" target="_blank" rel="noopener">HF 模型仓库</a></div>
   </div>
 
   <!-- 语音翻译 -->
